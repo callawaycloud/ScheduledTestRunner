@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <types>
+        <members>AutomatedTestingJob</members>
+        <members>AutomatedTestJobQueuer</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>Scheduled_Test_Result__c</members>
+        <members>AutomatedTestingQueue__c</members>
+        <name>CustomObject</name>
+    </types>
+    <version>44.0</version>
+</Package>
