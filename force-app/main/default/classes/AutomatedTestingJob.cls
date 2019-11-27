@@ -9,46 +9,8 @@ global with sharing class AutomatedTestingJob implements Schedulable {
         processAsyncResults();
     }
 
-    /*
-        Schedule String Format: Seconds Minutes Hours Day_of_month Month Day_of_week optional_year
-    */
-    public static void createEvery15MinuteScheduledJobs() {
-        AutomatedTestingJob atj = new AutomatedTestingJob();
-        string sch = '0 0 * * * ?';
-        system.schedule(
-            'Process Queued Unit Tests Every Top Of The Hour',
-            sch,
-            atj
-        );
-
-        sch = '0 15 * * * ?';
-        system.schedule(
-            'Process Queued Unit Tests At Each Quarter After',
-            sch,
-            atj
-        );
-
-        sch = '0 30 * * * ?';
-        system.schedule(
-            'Process Queued Unit Tests At Each Bottom Of The Hour',
-            sch,
-            atj
-        );
-
-        sch = '0 45 * * * ?';
-        system.schedule(
-            'Process Queued Unit Tests At Each Quarter To The Hour',
-            sch,
-            atj
-        );
-    }
-
     public static void processAsyncResults() {
-        List<Scheduled_Test_Result__c> queuedTests = [
-            SELECT id, name, Job_Id__c
-            FROM Scheduled_Test_Result__c
-            LIMIT 5
-        ];
+        List<Scheduled_Test_Result__c> queuedTests = [SELECT id, name, Job_Id__c FROM Scheduled_Test_Result__c LIMIT 5];
 
         if (queuedTests != null && queuedTests.size() > 0) {
             Set<Id> AsyncIds = new Set<Id>();
@@ -62,55 +24,33 @@ global with sharing class AutomatedTestingJob implements Schedulable {
             Map<Id, List<ApexTestQueueItem>> groupedTestsByJob = new Map<Id, List<ApexTestQueueItem>>();
 
             for (ApexTestQueueItem atqi : queuedItems) {
-                if (groupedTestsByJob.containsKey(atqi.ParentJobId) == true) {
-                    List<ApexTestQueueItem> groupedTests = groupedTestsByJob.get(
-                        atqi.ParentJobId
-                    );
-                    groupedTests.add(atqi);
-                } else {
-                    List<ApexTestQueueItem> groupedTests = new List<ApexTestQueueItem>();
-                    groupedTests.add(atqi);
-                    groupedTestsByJob.put(atqi.ParentJobId, groupedTests);
+                // null check
+                if (!groupedTestsByJob.containsKey(atqi.ParentJobId)) {
+                    groupedTestsByJob.put(atqi.ParentJobId, new List<ApexTestQueueItem>());
                 }
+
+                groupedTestsByJob.get(atqi.ParentJobId).add(atqui);
             }
 
-            Set<Id> completedAsyncIds = getCompletedAsyncJobsIds(
-                groupedTestsByJob
-            );
+            Set<Id> completedAsyncIds = getCompletedAsyncJobsIds(groupedTestsByJob);
 
             if (completedAsyncIds != null && completedAsyncIds.size() > 0) {
-                List<ApexTestResult> testResults = checkMethodStatus(
-                    completedAsyncIds
-                );
+                List<ApexTestResult> testResults = checkMethodStatus(completedAsyncIds);
 
                 Map<Id, List<ApexTestResult>> groupedTestResultsByJob = new Map<Id, List<ApexTestResult>>();
 
                 for (ApexTestResult testResult : testResults) {
-                    if (
-                        groupedTestResultsByJob.containsKey(
-                            testResult.AsyncApexJobId
-                        )
-                    ) {
-                        List<ApexTestResult> groupedTestsResults = groupedTestResultsByJob.get(
-                            testResult.AsyncApexJobId
-                        );
-                        groupedTestsResults.add(testResult);
-                    } else {
-                        List<ApexTestResult> groupedTestsResults = new List<ApexTestResult>();
-                        groupedTestsResults.add(testResult);
-
-                        groupedTestResultsByJob.put(
-                            testResult.AsyncApexJobId,
-                            groupedTestsResults
-                        );
+                    // null check
+                    if (!groupedTestResultsByJob.containsKey(testResult.AsyncApexJobId)) {
+                        groupedTestResultsByJob.put(testResult.AsyncApexJobId, new List<ApexTestResult>());
                     }
+
+                    groupedTestResultsByJob.get(testResult.AsyncApexJobId).add(testResult);
                 }
 
                 List<Scheduled_Test_Result__c> queuedTestsToDelete = new List<Scheduled_Test_Result__c>();
 
-                for (
-                    List<ApexTestResult> jobTestResults : groupedTestResultsByJob.values()
-                ) {
+                for (List<ApexTestResult> jobTestResults : groupedTestResultsByJob.values()) {
                     sendTestResultEmail(jobTestResults);
                 }
 
@@ -121,10 +61,7 @@ global with sharing class AutomatedTestingJob implements Schedulable {
                             break;
                         }
                     }
-                    if (
-                        groupedTestsByJob.containsKey(queuedTest.Job_Id__c) ==
-                        false
-                    ) {
+                    if (groupedTestsByJob.containsKey(queuedTest.Job_Id__c) == false) {
                         queuedTestsToDelete.add(queuedTest);
                     }
                 }
@@ -136,9 +73,7 @@ global with sharing class AutomatedTestingJob implements Schedulable {
         }
     }
 
-    public static Set<Id> getCompletedAsyncJobsIds(
-        Map<Id, List<ApexTestQueueItem>> groupedTestsByJob
-    ) {
+    public static Set<Id> getCompletedAsyncJobsIds(Map<Id, List<ApexTestQueueItem>> groupedTestsByJob) {
         Set<Id> completedAsyncJobIds = new Set<Id>();
 
         for (List<ApexTestQueueItem> jobTests : groupedTestsByJob.values()) {
@@ -167,10 +102,8 @@ global with sharing class AutomatedTestingJob implements Schedulable {
         return completedAsyncJobIds;
     }
 
-    private static void sendTestResultEmail(
-        List<ApexTestResult> jobTestResults
-    ) {
-        system.debug(' In sendTestResultEmail');
+    private static void sendTestResultEmail(List<ApexTestResult> jobTestResults) {
+        System.debug(' In sendTestResultEmail');
 
         Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
 
@@ -180,8 +113,7 @@ global with sharing class AutomatedTestingJob implements Schedulable {
 
         mail.setToAddresses(toAddresses);
 
-        String emailSubject =
-            'Dev Unit Test Results ' + String.valueOf(Date.today());
+        String emailSubject = 'Dev Unit Test Results ' + String.valueOf(Date.today());
 
         mail.setSubject(emailSubject);
 
@@ -190,13 +122,11 @@ global with sharing class AutomatedTestingJob implements Schedulable {
         mail.setHtmlBody(testResultEmailbody);
         Messaging.sendEmail(new List<Messaging.Email>{ mail });
 
-        system.debug(' sent test results email');
+        System.debug(' sent test results email');
     }
 
-    private static String getTestResultHtmlEmailBody(
-        List<ApexTestResult> jobTestResults
-    ) {
-        system.debug(' In getTestResultHtmlEmailBody');
+    private static String getTestResultHtmlEmailBody(List<ApexTestResult> jobTestResults) {
+        System.debug(' In getTestResultHtmlEmailBody');
 
         List<ApexTestResult> successTests = new List<ApexTestResult>();
         List<ApexTestResult> failedTests = new List<ApexTestResult>();
@@ -243,22 +173,10 @@ global with sharing class AutomatedTestingJob implements Schedulable {
             for (ApexTestResult testFailure : failedTests) {
                 testResultBody += '';
 
-                testResultBody +=
-                    '<td style="padding: 5px; vertical-align: top;">' +
-                    testFailure.ApexClass.Name +
-                    '';
-                testResultBody +=
-                    '<td style="padding: 5px; vertical-align: top;">' +
-                    testFailure.MethodName +
-                    '';
-                testResultBody +=
-                    '<td style="padding: 5px; vertical-align: top;">' +
-                    testFailure.message +
-                    '';
-                testResultBody +=
-                    '<td style="padding: 5px; vertical-align: top;">' +
-                    testFailure.stackTrace +
-                    '';
+                testResultBody += '<td style="padding: 5px; vertical-align: top;">' + testFailure.ApexClass.Name + '';
+                testResultBody += '<td style="padding: 5px; vertical-align: top;">' + testFailure.MethodName + '';
+                testResultBody += '<td style="padding: 5px; vertical-align: top;">' + testFailure.message + '';
+                testResultBody += '<td style="padding: 5px; vertical-align: top;">' + testFailure.stackTrace + '';
                 testResultBody +=
                     '<td style="padding: 5px; vertical-align: top;">' +
                     testFailure.ApexLog.DurationMilliseconds +
@@ -288,9 +206,7 @@ global with sharing class AutomatedTestingJob implements Schedulable {
         ];
 
         for (ApexTestQueueItem item : items) {
-            String extStatus = item.extendedstatus == null
-                ? ''
-                : item.extendedStatus;
+            String extStatus = item.extendedstatus == null ? '' : item.extendedStatus;
             System.debug(item.ApexClass.Name + ': ' + item.Status + extStatus);
         }
 
@@ -324,13 +240,7 @@ global with sharing class AutomatedTestingJob implements Schedulable {
         ];
 
         for (ApexTestResult atr : results) {
-            System.debug(
-                atr.ApexClass.Name +
-                '.' +
-                atr.MethodName +
-                ': ' +
-                atr.Outcome
-            );
+            System.debug(atr.ApexClass.Name + '.' + atr.MethodName + ': ' + atr.Outcome);
             if (atr.message != null) {
                 System.debug(atr.Message + '\n at ' + atr.StackTrace);
             }
