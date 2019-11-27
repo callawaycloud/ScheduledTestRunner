@@ -29,7 +29,7 @@ global with sharing class AutomatedTestingJob implements Schedulable {
                     groupedTestsByJob.put(atqi.ParentJobId, new List<ApexTestQueueItem>());
                 }
 
-                groupedTestsByJob.get(atqi.ParentJobId).add(atqui);
+                groupedTestsByJob.get(atqi.ParentJobId).add(atqi);
             }
 
             Set<Id> completedAsyncIds = getCompletedAsyncJobsIds(groupedTestsByJob);
