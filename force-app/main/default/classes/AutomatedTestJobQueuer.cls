@@ -13,10 +13,18 @@ public with sharing class AutomatedTestJobQueuer implements Schedulable {
             }
 
             // bulk insert, when bulk inserted they will all contain the same ParentJobId
-            insert queueItems;
+            if (!Test.isRunningTest()) {
+                // can't queue unit tests while running a test
+                insert queueItems;
+            }
 
             // grab the ParentJobId and store it for AutomatedTestingJob.cls
-            ApexTestQueueItem item = [SELECT ParentJobId FROM ApexTestQueueItem WHERE Id = :queueItems[0].Id LIMIT 1];
+            ApexTestQueueItem item;
+            if (!Test.isRunningTest()) {
+                item = [SELECT ParentJobId FROM ApexTestQueueItem WHERE Id = :queueItems[0].Id LIMIT 1];
+            } else {
+                item = new ApexTestQueueItem(Id = '70923000000IVrhAAG');
+            }
 
             Automated_Test_Package__c customSetting = [
                 SELECT Id, Parent_Job_Id__c
