@@ -10,8 +10,7 @@ private class AutomatedTestJobQueuerTest {
         Test.setFixedSearchResults(new List<Id>{ '01p3A000001LkX5' }); // ApexClass result type Id for search queries
 
         Test.StartTest();
-        AutomatedTestJobQueuer sh1 = new AutomatedTestJobQueuer();
-        System.schedule('Automated Test Job [UNIT TESTING]', '0 0 23 * * ?', new AutomatedTestJobQueuer());
+        System.schedule('Automated Test Job Queuer [UNIT TESTING]', '0 0 23 * * ?', new AutomatedTestJobQueuer());
         Test.stopTest();
     }
 }
