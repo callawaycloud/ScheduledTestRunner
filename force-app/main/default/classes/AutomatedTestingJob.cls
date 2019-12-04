@@ -1,184 +1,102 @@
+/**
+ *
+ */
 public with sharing class AutomatedTestingJob implements Schedulable {
+    private Automated_Test_Package__c settings;
+
     public void execute(SchedulableContext SC) {
+        settings = [SELECT Id, Parent_Job_Id__c FROM Automated_Test_Package__c][0];
         processAsyncResults();
     }
 
     /**
+     *
      */
     @testVisible
-    private static void processAsyncResults() {
-        // parent job storage
-        List<Scheduled_Test_Result__c> queuedTests = [SELECT Id, Name, Job_Id__c FROM Scheduled_Test_Result__c LIMIT 5];
-
-        if (queuedTests != null && queuedTests.size() > 0) {
-            Set<Id> parentJobIds = new Set<Id>();
-
-            for (Scheduled_Test_Result__c queuedJob : queuedTests) {
-                parentJobIds.add(queuedJob.Job_Id__c);
-            }
-
+    private void processAsyncResults() {
+        if (settings.Parent_Job_Id__c != null) {
             // list of classes with info on their test statuses (ie pass/fail)
-            List<ApexTestQueueItem> classTestStatuses = getClassTestStatuses(parentJobIds);
+            List<ApexTestQueueItem> classTestStatuses = getClassTestStatuses(settings.Parent_Job_Id__c);
 
-            // map of parent job id to class test statuses
-            Map<Id, List<ApexTestQueueItem>> groupedTestsByJob = new Map<Id, List<ApexTestQueueItem>>();
-            for (ApexTestQueueItem classTestStatus : classTestStatuses) {
-                // null check
-                if (!groupedTestsByJob.containsKey(classTestStatus.ParentJobId)) {
-                    groupedTestsByJob.put(classTestStatus.ParentJobId, new List<ApexTestQueueItem>());
-                }
+            Boolean testsDoneRunning = allTestsComplete(classTestStatuses);
 
-                groupedTestsByJob.get(classTestStatus.ParentJobId).add(classTestStatus);
-            }
-
-            Set<Id> completedAsyncIds = getCompletedAsyncJobsIds(groupedTestsByJob);
-
-            if (completedAsyncIds != null && completedAsyncIds.size() > 0) {
+            if (testsDoneRunning) {
                 // each item is the actual result of a single test method
-                List<ApexTestResult> testResults = checkMethodStatus(completedAsyncIds);
-
-                // map job id to list of test results
-                Map<Id, List<ApexTestResult>> groupedTestResultsByJob = new Map<Id, List<ApexTestResult>>();
-                for (ApexTestResult testResult : testResults) {
-                    // null check
-                    if (!groupedTestResultsByJob.containsKey(testResult.AsyncApexJobId)) {
-                        groupedTestResultsByJob.put(testResult.AsyncApexJobId, new List<ApexTestResult>());
-                    }
-
-                    groupedTestResultsByJob.get(testResult.AsyncApexJobId).add(testResult);
-                }
-
-                List<Scheduled_Test_Result__c> queuedTestsToDelete = new List<Scheduled_Test_Result__c>();
-
-                for (List<ApexTestResult> jobTestResults : groupedTestResultsByJob.values()) {
-                    processResults(jobTestResults);
-                }
-
-                for (Scheduled_Test_Result__c queuedTest : queuedTests) {
-                    for (Id completedAsyncId : completedAsyncIds) {
-                        if (queuedTest.Job_Id__c == completedAsyncId) {
-                            queuedTestsToDelete.add(queuedTest);
-                            break;
-                        }
-                    }
-
-                    if (groupedTestsByJob.containsKey(queuedTest.Job_Id__c) == false) {
-                        queuedTestsToDelete.add(queuedTest);
-                    }
-                }
-
-                if (queuedTestsToDelete.size() > 0) {
-                    // delete queuedTestsToDelete;
-                }
+                List<ApexTestResult> testResults = getTestResults(settings.Parent_Job_Id__c);
+                processTestResults(testResults);
             }
         }
     }
 
     /**
-     * Checks to see if a parent job's list of queued up unit tests are done running.
      *
-     * Only returns a set of parent job ids that have its units done (failed/aborrted/completed).
-     *
-     * @param groupedTestsByJob map of parent job ID to list of its queued unit tests
      */
     @testVisible
-    private static Set<Id> getCompletedAsyncJobsIds(Map<Id, List<ApexTestQueueItem>> groupedTestsByJob) {
-        Set<Id> completedAsyncJobIds = new Set<Id>();
+    private boolean allTestsComplete(List<ApexTestQueueItem> classTestStatuses) {
+        if (classTestStatuses == null || classTestStatuses.size() == 0) {
+            return false;
+        }
 
-        for (List<ApexTestQueueItem> jobTests : groupedTestsByJob.values()) {
-            if (jobTests == null || jobTests.size() == 0) {
-                continue;
-            }
-
-            Boolean allCompleted = true;
-
-            for (ApexTestQueueItem queuedTest : jobTests) {
-                if (
-                    queuedTest.Status != 'Completed' &&
-                    queuedTest.Status != 'Failed' &&
-                    queuedTest.Status != 'Aborted'
-                ) {
-                    allCompleted = false;
-                    break;
-                }
-            }
-
-            if (allCompleted == true) {
-                completedAsyncJobIds.add(jobTests[0].ParentJobId);
+        for (ApexTestQueueItem classTestStatus : classTestStatuses) {
+            if (
+                classTestStatus.Status != 'Completed' &&
+                classTestStatus.Status != 'Failed' &&
+                classTestStatus.Status != 'Aborted'
+            ) {
+                return false;
             }
         }
 
-        return completedAsyncJobIds;
+        return true;
     }
 
     /**
-     * Get the status and pass rate for each class whose tests were run by
-     * the job (that correspond to the specified job ID).
+     *
      */
     @testVisible
-    private static List<ApexTestQueueItem> getClassTestStatuses(Set<ID> jobIds) {
+    private static List<ApexTestQueueItem> getClassTestStatuses(Id parentJobId) {
         return [
             SELECT ApexClass.Name, Status, ExtendedStatus, ParentJobId
             FROM ApexTestQueueItem
-            WHERE ParentJobId IN :jobIds
+            WHERE ParentJobId = :parentJobId
         ];
     }
 
     /**
-     * Queries and returns a list of apex test results. Each result item represents
-     * a method's test result.
      *
-     * @param jobIds parent job ID to filter on (equivalent to ApexTestQueueItem.ParentJobId)
      */
     @testVisible
-    private static List<ApexTestResult> checkMethodStatus(Set<ID> jobIds) {
+    private static List<ApexTestResult> getTestResults(Id jobId) {
         return [
-            SELECT
-                Outcome,
-                MethodName,
-                Message,
-                StackTrace,
-                AsyncApexJobId,
-                ApexClass.Name,
-                ApexClass.Body,
-                ApexClass.LengthWithoutComments,
-                ApexClass.NamespacePrefix,
-                ApexClass.Status,
-                ApexLogId,
-                ApexLog.DurationMilliseconds,
-                ApexLog.Operation,
-                ApexLog.Request,
-                ApexLog.Status,
-                ApexLog.Location,
-                ApexLog.Application
+            SELECT Outcome, MethodName, Message, StackTrace, AsyncApexJobId, ApexClass.Name
+            // ApexClass.Body, ApexClass.LengthWithoutComments, ApexClass.NamespacePrefix, ApexClass.Status, ApexLogId,
+            // ApexLog.DurationMilliseconds, ApexLog.Operation, ApexLog.Request, ApexLog.Status, ApexLog.Location, ApexLog.Application
             FROM ApexTestResult
-            WHERE AsyncApexJobId IN :jobIds
+            WHERE AsyncApexJobId = :jobId
         ];
     }
 
     /**
      */
     @testVisible
-    private static void processResults(List<ApexTestResult> jobTestResults) {
-        List<ApexTestResult> successTests = new List<ApexTestResult>();
-        List<ApexTestResult> failedTests = new List<ApexTestResult>();
+    private static void processTestResults(List<ApexTestResult> jobTestResults) {
+        // first clear all old results
+        delete [SELECT Id FROM Automated_Test_Job_Results__c];
+
+        List<Automated_Test_Job_Results__c> results = new List<Automated_Test_Job_Results__c>();
 
         for (ApexTestResult jobTestResult : jobTestResults) {
-            if (jobTestResult.Outcome == 'Pass') {
-                successTests.add(jobTestResult);
-            } else {
-                failedTests.add(jobTestResult);
-            }
+            results.add(
+                new Automated_Test_Job_Results__c(
+                    Name = jobTestResult.ApexClass.Name,
+                    Method_Name__c = jobTestResult.MethodName,
+                    Message__c = jobTestResult.message,
+                    Stack_Trace__c = jobTestResult.stackTrace,
+                    Method_Pass__c = jobTestResult.Outcome == 'Pass' ? true : false
+                )
+            );
         }
 
-        if (failedTests.size() > 0) {
-            for (ApexTestResult testFailure : failedTests) {
-                // testFailure.ApexClass.Name
-                // testFailure.MethodName
-                // testFailure.message
-                // testFailure.stackTrace
-                // testFailure.ApexLog.DurationMilliseconds
-            }
-        }
+        insert results;
     }
 }

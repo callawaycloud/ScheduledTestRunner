@@ -1,3 +1,15 @@
 # Scheduled Test Runner
 
-A library for scheduling production test runs
+A Salesforce package for knowing the current status of your organization's unit tests.
+
+## Install
+
+TODO
+
+## Scheduling
+
+TODO
+
+## Uninstall
+
+TODO

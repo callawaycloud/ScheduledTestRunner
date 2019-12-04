@@ -1,8 +1,5 @@
 /**
- * Begins automated tests by executing all unit tests. Stores their parent
- * job in Scheduled_Test_Result__c custom object.
- *
- * AutomatedTestingJob.cls uses the parent job id to review the test results.
+ * *
  */
 public with sharing class AutomatedTestJobQueuer implements Schedulable {
     public void execute(SchedulableContext SC) {
@@ -20,9 +17,15 @@ public with sharing class AutomatedTestJobQueuer implements Schedulable {
 
             // grab the ParentJobId and store it for AutomatedTestingJob.cls
             ApexTestQueueItem item = [SELECT ParentJobId FROM ApexTestQueueItem WHERE Id = :queueItems[0].Id LIMIT 1];
-            Scheduled_Test_Result__c atq = new Scheduled_Test_Result__c(Job_Id__c = item.ParentJobId);
 
-            insert atq;
+            Automated_Test_Package__c customSetting = [
+                SELECT Id, Parent_Job_Id__c
+                FROM Automated_Test_Package__c
+                LIMIT 1
+            ];
+
+            customSetting.Parent_Job_Id__c = item.ParentJobId;
+            update customSetting;
         }
     }
 }
