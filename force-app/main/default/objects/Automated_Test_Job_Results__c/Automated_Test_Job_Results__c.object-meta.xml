@@ -43,7 +43,7 @@
     <allowInChatterGroups>false</allowInChatterGroups>
     <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
     <deploymentStatus>Deployed</deploymentStatus>
-    <enableActivities>false</enableActivities>
+    <enableActivities>true</enableActivities>
     <enableBulkApi>true</enableBulkApi>
     <enableFeeds>false</enableFeeds>
     <enableHistory>false</enableHistory>
@@ -51,13 +51,12 @@
     <enableSearch>false</enableSearch>
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
-    <label>Scheduled Test Result</label>
+    <label>Automated Test Job Result</label>
     <nameField>
-        <displayFormat>UT-{0000}</displayFormat>
-        <label>Scheduled Test Run Name</label>
-        <type>AutoNumber</type>
+        <label>Apex Class Name</label>
+        <type>Text</type>
     </nameField>
-    <pluralLabel>Scheduled Test Results</pluralLabel>
+    <pluralLabel>Automated Test Job Results</pluralLabel>
     <searchLayouts/>
     <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
