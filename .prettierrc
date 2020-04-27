@@ -11,5 +11,7 @@
         }
     ],
     "tabWidth": 4,
-    "printWidth": 120
+    "printWidth": 120,
+    "apexInsertFinalNewline": false,
+    "endOfLine": "lf"
 }
