@@ -2,7 +2,7 @@
  *
  */
 @isTest
-private class AutomatedTestJobQueuerTest {
+private class TestRunProcesssorTest {
     // see all data necessary to we can query custom settings
     @isTest(SeeAllData=true)
     public static void testQueuer() {
@@ -10,7 +10,7 @@ private class AutomatedTestJobQueuerTest {
         Test.setFixedSearchResults(new List<Id>{ '01p3A000001LkX5' }); // ApexClass result type Id for search queries
 
         Test.StartTest();
-        System.schedule('Automated Test Job Queuer [UNIT TESTING]', '0 0 23 * * ?', new AutomatedTestJobQueuer());
+        System.schedule('Automated Test Job Queuer [UNIT TESTING]', '0 0 23 * * ?', new TestRunProcesssor());
         Test.stopTest();
     }
 }

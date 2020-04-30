@@ -1,15 +1,15 @@
 /**
- * This scheduleable class fires starts all of the unit tests.
+ * This class starts the unit test run.
  *
  * Each execution of the org's unit tests will have a parent job id,
- * this is stored in Automated_Test_Package__c.
+ * this is stored in Test_Run__c.
  *
- * AutomatedTestingJob.cls, also scheduleable, checks the status of the parent
- * job id. When it is complete it'll fire off and check the results.
+ * TestRunProcesssor.cls, also scheduleable, checks the status of the test
+ * run. When it is complete it'll fire off and check the results.
  *
  * TLDR; this class starts the org's unit tests, but does nothing with the results.
  */
-public with sharing class AutomatedTestJobQueuer implements Schedulable {
+public with sharing class TestRunScheduler implements Schedulable {
     public void execute(SchedulableContext SC) {
         // get all unit test classes (excluding managed package unit tests)
         ApexClass[] testClasses = [FIND '@isTest' IN ALL FIELDS RETURNING ApexClass(Id, Name)][0];
@@ -26,20 +26,12 @@ public with sharing class AutomatedTestJobQueuer implements Schedulable {
                 insert queueItems;
             }
 
-            // grab the ParentJobId and store it for AutomatedTestingJob.cls
-            ApexTestQueueItem item;
-            if (!Test.isRunningTest()) {
-                item = [SELECT ParentJobId FROM ApexTestQueueItem WHERE Id = :queueItems[0].Id LIMIT 1];
-            }
+            Test_Run__c newRun = new Test_Run__c(
+                Parent_Job_Id__c = queueItems[0].ParentJobId,
+                Total_Classes__c = queueItems.size()
+            );
 
-            Automated_Test_Package__c customSetting = [
-                SELECT Id, Parent_Job_Id__c
-                FROM Automated_Test_Package__c
-                LIMIT 1
-            ];
-
-            customSetting.Parent_Job_Id__c = item.ParentJobId;
-            update customSetting;
+            insert newRun;
         }
     }
 }
