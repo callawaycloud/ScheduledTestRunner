@@ -12,7 +12,7 @@
 public with sharing class TestRunScheduler implements Schedulable {
     public void execute(SchedulableContext SC) {
         // get all unit test classes (excluding managed package unit tests)
-        ApexClass[] testClasses = [FIND '@isTest' IN ALL FIELDS RETURNING ApexClass(Id, Name)][0];
+        List<ApexClass> testClasses = [FIND '@isTest' IN ALL FIELDS RETURNING ApexClass(Id, Name)][0];
 
         if (testClasses.size() > 0) {
             List<ApexTestQueueItem> queueItems = new List<ApexTestQueueItem>();
@@ -33,7 +33,7 @@ public with sharing class TestRunScheduler implements Schedulable {
 
             Test_Run__c newRun = new Test_Run__c(
                 Parent_Job_Id__c = queueItem.ParentJobId,
-                Total_Classes__c = queueItems.size(),
+                Total_Classes__c = queueItems.size() - 1, // - 1 because it'll include this class because of hte FIND query above
                 Processed__c = false
             );
 

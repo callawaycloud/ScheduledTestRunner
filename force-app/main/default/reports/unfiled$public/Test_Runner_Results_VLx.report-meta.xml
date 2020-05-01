@@ -23,7 +23,7 @@
     </groupingsDown>
     <groupingsDown>
         <dateGranularity>Day</dateGranularity>
-        <field>Test_Run__c$Parent_Job_Id__c</field>
+        <field>Test_Run__c$Name</field>
         <sortOrder>Asc</sortOrder>
     </groupingsDown>
     <groupingsDown>
