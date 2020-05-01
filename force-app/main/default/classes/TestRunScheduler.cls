@@ -26,8 +26,13 @@ public with sharing class TestRunScheduler implements Schedulable {
                 insert queueItems;
             }
 
+            ApexTestQueueItem queueItem;
+            if (!Test.isRunningTest()) {
+                queueItem = [SELECT ParentJobId FROM ApexTestQueueItem WHERE Id = :queueItems[0].Id LIMIT 1];
+            }
+
             Test_Run__c newRun = new Test_Run__c(
-                Parent_Job_Id__c = queueItems[0].ParentJobId,
+                Parent_Job_Id__c = queueItem.ParentJobId,
                 Total_Classes__c = queueItems.size(),
                 Processed__c = false
             );
