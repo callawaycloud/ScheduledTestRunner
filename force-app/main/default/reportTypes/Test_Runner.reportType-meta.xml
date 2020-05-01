@@ -55,6 +55,11 @@
             <field>Processed__c</field>
             <table>Test_Run__c</table>
         </columns>
+        <columns>
+            <checkedByDefault>false</checkedByDefault>
+            <field>Test_Failures__c</field>
+            <table>Test_Run__c</table>
+        </columns>
         <masterLabel>Test Runs</masterLabel>
     </sections>
     <sections>

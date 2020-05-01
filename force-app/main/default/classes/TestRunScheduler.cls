@@ -32,6 +32,7 @@ public with sharing class TestRunScheduler implements Schedulable {
             }
 
             Test_Run__c newRun = new Test_Run__c(
+                Name = 'Test Run: ' + String.valueOf(DateTime.now()),
                 Parent_Job_Id__c = Test.isRunningTest() ? 'testingParentJobId' : queueItem.ParentJobId,
                 Processed__c = false
             );

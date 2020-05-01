@@ -25,6 +25,11 @@
         <field>Test_Run__c.Processed__c</field>
         <readable>true</readable>
     </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Test_Run__c.Test_Failures__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Test Runner</label>
     <license>Salesforce</license>

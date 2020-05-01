@@ -9,9 +9,6 @@ public with sharing class TestRunProcesssor implements Schedulable {
         List<Test_Run__c> testRuns = [SELECT Id, Parent_Job_Id__c FROM Test_Run__c WHERE Processed__c = false];
 
         for (Test_Run__c testRun : testRuns) {
-            // System.assert(testRun.Parent_Job_Id__c != null);
-            // // System.assert(false, 'maximus');
-            // System.assert(false, 'maximus');
             if (testRun.Parent_Job_Id__c != null && allTestsComplete(testRun.Parent_Job_Id__c)) {
                 // each item of testResults is the actual result of a single test method
                 List<ApexTestResult> testResults = getTestResults(testRun.Parent_Job_Id__c);

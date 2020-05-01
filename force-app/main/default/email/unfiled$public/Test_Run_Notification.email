@@ -1,0 +1,4 @@
+There was
+{!Test_Run__c.Test_Failures__c} unit test failure(s) in the recent test run.
+
+To view all errors, view: {!Test_Run__c.Link}
