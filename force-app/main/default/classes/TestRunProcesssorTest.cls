@@ -9,7 +9,6 @@ private class TestRunProcesssorTest {
 
         Test_Run__c testRun = new Test_Run__c(
             Parent_Job_Id__c = classes[0].Id, // wrong id type but we just need a valid SFDC Id for now
-            Total_Classes__c = 1,
             Processed__c = false
         );
         insert testRun;

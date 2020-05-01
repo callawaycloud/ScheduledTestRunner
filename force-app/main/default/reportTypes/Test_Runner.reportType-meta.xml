@@ -52,11 +52,6 @@
         </columns>
         <columns>
             <checkedByDefault>false</checkedByDefault>
-            <field>Total_Classes__c</field>
-            <table>Test_Run__c</table>
-        </columns>
-        <columns>
-            <checkedByDefault>false</checkedByDefault>
             <field>Processed__c</field>
             <table>Test_Run__c</table>
         </columns>

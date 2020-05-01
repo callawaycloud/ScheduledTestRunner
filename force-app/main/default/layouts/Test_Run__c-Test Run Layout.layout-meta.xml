@@ -8,8 +8,8 @@
         <label>Information</label>
         <layoutColumns>
             <layoutItems>
-                <behavior>Required</behavior>
-                <field>Total_Classes__c</field>
+                <behavior>Readonly</behavior>
+                <field>Test_Failures__c</field>
             </layoutItems>
         </layoutColumns>
         <layoutColumns>

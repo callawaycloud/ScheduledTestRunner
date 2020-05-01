@@ -6,11 +6,7 @@
  */
 public with sharing class TestRunProcesssor implements Schedulable {
     public void execute(SchedulableContext SC) {
-        List<Test_Run__c> testRuns = [
-            SELECT Id, Parent_Job_Id__c, Total_Classes__c
-            FROM Test_Run__c
-            WHERE Processed__c = false
-        ];
+        List<Test_Run__c> testRuns = [SELECT Id, Parent_Job_Id__c FROM Test_Run__c WHERE Processed__c = false];
 
         for (Test_Run__c testRun : testRuns) {
             // System.assert(testRun.Parent_Job_Id__c != null);

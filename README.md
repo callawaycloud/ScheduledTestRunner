@@ -4,7 +4,7 @@ A Salesforce package for knowing the current status of your organization's unit 
 
 ## Install
 
-TODO
+sfdx force:package:install --apexcompile=package --package=TestRunner --noprompt
 
 ## Scheduling
 
