@@ -2,22 +2,27 @@
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
     <fieldPermissions>
         <editable>true</editable>
-        <field>Automated_Test_Job_Results__c.Message__c</field>
+        <field>Test_Run_Method_Result__c.Message__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Automated_Test_Job_Results__c.Method_Name__c</field>
+        <field>Test_Run_Method_Result__c.Method_Name__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Automated_Test_Job_Results__c.Method_Pass__c</field>
+        <field>Test_Run_Method_Result__c.Method_Pass__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Automated_Test_Job_Results__c.Stack_Trace__c</field>
+        <field>Test_Run_Method_Result__c.Stack_Trace__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Test_Run__c.Processed__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
@@ -29,7 +34,16 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>Automated_Test_Job_Results__c</object>
+        <object>Test_Run_Method_Result__c</object>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>true</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>true</modifyAllRecords>
+        <object>Test_Run__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
 </PermissionSet>
