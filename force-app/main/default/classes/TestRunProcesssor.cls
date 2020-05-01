@@ -13,6 +13,9 @@ public with sharing class TestRunProcesssor implements Schedulable {
         ];
 
         for (Test_Run__c testRun : testRuns) {
+            // System.assert(testRun.Parent_Job_Id__c != null);
+            // // System.assert(false, 'maximus');
+            // System.assert(false, 'maximus');
             if (testRun.Parent_Job_Id__c != null && allTestsComplete(testRun.Parent_Job_Id__c)) {
                 // each item of testResults is the actual result of a single test method
                 List<ApexTestResult> testResults = getTestResults(testRun.Parent_Job_Id__c);
@@ -25,7 +28,7 @@ public with sharing class TestRunProcesssor implements Schedulable {
         }
     }
 
-    private boolean allTestsComplete(Id parentJobId) {
+    private Boolean allTestsComplete(Id parentJobId) {
         List<ApexTestQueueItem> classTestStatuses = getClassTestStatuses(parentJobId);
 
         if (classTestStatuses == null || classTestStatuses.size() == 0) {
@@ -46,21 +49,50 @@ public with sharing class TestRunProcesssor implements Schedulable {
     }
 
     private List<ApexTestQueueItem> getClassTestStatuses(Id parentJobId) {
-        return [
+        List<ApexTestQueueItem> queueItems = [
             SELECT ApexClass.Name, Status, ExtendedStatus, ParentJobId
             FROM ApexTestQueueItem
             WHERE ParentJobId = :parentJobId
         ];
+
+        if (Test.isRunningTest()) {
+            queueItems.add(
+                (ApexTestQueueItem) JSON.deserialize(
+                    '{"ApexClass.Name":"TestRunProcesssorTest","Status":"Completed"}',
+                    ApexTestQueueItem.class
+                )
+            );
+        }
+
+        return queueItems;
     }
 
     private List<ApexTestResult> getTestResults(Id parentJobId) {
-        return [
+        List<ApexTestResult> testResults = [
             SELECT Outcome, MethodName, Message, StackTrace, AsyncApexJobId, ApexClass.Name
             // ApexClass.Body, ApexClass.LengthWithoutComments, ApexClass.NamespacePrefix, ApexClass.Status, ApexLogId,
             // ApexLog.DurationMilliseconds, ApexLog.Operation, ApexLog.Request, ApexLog.Status, ApexLog.Location, ApexLog.Application
             FROM ApexTestResult
             WHERE AsyncApexJobId = :parentJobId
         ];
+
+        if (Test.isRunningTest()) {
+            testResults.add(
+                (ApexTestResult) JSON.deserialize(
+                    '{' +
+                    '"Outcome":"asdf",' +
+                    '"MethodName":"asdf",' +
+                    '"Message":"asdf",' +
+                    '"StackTrace":"asdf",' +
+                    '"AsyncApexJobId":"asdf",' +
+                    '"ApexClass.Name":"asdf"' +
+                    '}',
+                    ApexTestResult.class
+                )
+            );
+        }
+
+        return testResults;
     }
 
     /**

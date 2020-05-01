@@ -3,11 +3,16 @@
  */
 @isTest
 private class TestRunProcesssorTest {
-    // see all data necessary to we can query custom settings
-    @isTest(SeeAllData=true)
+    @isTest
     public static void testQueuer() {
-        // https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_testing_SOSL.htm
-        Test.setFixedSearchResults(new List<Id>{ '01p3A000001LkX5' }); // ApexClass result type Id for search queries
+        List<ApexClass> classes = [SELECT Id, Name, Body FROM ApexClass WHERE Name = 'TestRunProcesssorTest'];
+
+        Test_Run__c testRun = new Test_Run__c(
+            Parent_Job_Id__c = classes[0].Id, // wrong id type but we just need a valid SFDC Id for now
+            Total_Classes__c = 1,
+            Processed__c = false
+        );
+        insert testRun;
 
         Test.StartTest();
         System.schedule('Automated Test Job Queuer [UNIT TESTING]', '0 0 23 * * ?', new TestRunProcesssor());

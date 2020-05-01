@@ -32,7 +32,7 @@ public with sharing class TestRunScheduler implements Schedulable {
             }
 
             Test_Run__c newRun = new Test_Run__c(
-                Parent_Job_Id__c = queueItem.ParentJobId,
+                Parent_Job_Id__c = Test.isRunningTest() ? 'testingParentJobId' : queueItem.ParentJobId,
                 Total_Classes__c = queueItems.size() - 1, // - 1 because it'll include this class because of hte FIND query above
                 Processed__c = false
             );
