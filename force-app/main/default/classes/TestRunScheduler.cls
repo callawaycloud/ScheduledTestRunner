@@ -28,10 +28,18 @@ public with sharing class TestRunScheduler implements Schedulable {
 
             Test_Run__c newRun = new Test_Run__c(
                 Parent_Job_Id__c = queueItems[0].ParentJobId,
-                Total_Classes__c = queueItems.size()
+                Total_Classes__c = queueItems.size(),
+                Processed__c = false
             );
 
             insert newRun;
         }
+
+        clearOldRuns();
+    }
+
+    public void clearOldRuns() {
+        // delete completed runs older than a month, will remove child Test_Run_Method_Result__c tuples as well
+        delete [SELECT Id FROM Test_Run__c WHERE Processed__c = true AND CreatedDate > LAST_N_DAYS:30];
     }
 }

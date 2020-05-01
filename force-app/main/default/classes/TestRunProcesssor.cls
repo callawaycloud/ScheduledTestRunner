@@ -9,87 +9,80 @@ public with sharing class TestRunProcesssor implements Schedulable {
         List<Test_Run__c> testRuns = [
             SELECT Id, Parent_Job_Id__c, Total_Classes__c
             FROM Test_Run__c
-            WHERE Processed__c != true
+            WHERE Processed__c = false
         ];
 
         for (Test_Run__c testRun : testRuns) {
-            // processAsyncResults(automatedTestRun.Parent_Job_Id__c);
+            if (testRun.Parent_Job_Id__c != null && allTestsComplete(testRun.Parent_Job_Id__c)) {
+                // each item of testResults is the actual result of a single test method
+                List<ApexTestResult> testResults = getTestResults(testRun.Parent_Job_Id__c);
+                processTestResults(testRun, testResults);
+
+                // update the test run
+                testRun.Processed__c = true;
+                update testRun;
+            }
         }
     }
 
-    // private void processAsyncResults(Id parentJobId) {
-    //     System.debug('Processing Async Results for parent job: ' + parentJobId);
+    private boolean allTestsComplete(Id parentJobId) {
+        List<ApexTestQueueItem> classTestStatuses = getClassTestStatuses(parentJobId);
 
-    //     if (parentJobId != null) {
-    //         if (allTestsComplete(parentJobId)) {
-    //             // each item is the actual result of a single test method
-    //             List<ApexTestResult> testResults = getTestResults(parentJobId);
-    //             processTestResults(testResults, parentJobId);
-    //         }
-    //     }
-    // }
+        if (classTestStatuses == null || classTestStatuses.size() == 0) {
+            return false;
+        }
 
-    // private boolean allTestsComplete(Id parentJobId) {
-    //     List<ApexTestQueueItem> classTestStatuses = getClassTestStatuses(parentJobId);
+        for (ApexTestQueueItem classTestStatus : classTestStatuses) {
+            if (
+                classTestStatus.Status != 'Completed' &&
+                classTestStatus.Status != 'Failed' &&
+                classTestStatus.Status != 'Aborted'
+            ) {
+                return false;
+            }
+        }
 
-    //     if (classTestStatuses == null || classTestStatuses.size() == 0) {
-    //         return false;
-    //     }
+        return true;
+    }
 
-    //     for (ApexTestQueueItem classTestStatus : classTestStatuses) {
-    //         if (
-    //             classTestStatus.Status != 'Completed' &&
-    //             classTestStatus.Status != 'Failed' &&
-    //             classTestStatus.Status != 'Aborted'
-    //         ) {
-    //             return false;
-    //         }
-    //     }
+    private List<ApexTestQueueItem> getClassTestStatuses(Id parentJobId) {
+        return [
+            SELECT ApexClass.Name, Status, ExtendedStatus, ParentJobId
+            FROM ApexTestQueueItem
+            WHERE ParentJobId = :parentJobId
+        ];
+    }
 
-    //     return true;
-    // }
+    private List<ApexTestResult> getTestResults(Id parentJobId) {
+        return [
+            SELECT Outcome, MethodName, Message, StackTrace, AsyncApexJobId, ApexClass.Name
+            // ApexClass.Body, ApexClass.LengthWithoutComments, ApexClass.NamespacePrefix, ApexClass.Status, ApexLogId,
+            // ApexLog.DurationMilliseconds, ApexLog.Operation, ApexLog.Request, ApexLog.Status, ApexLog.Location, ApexLog.Application
+            FROM ApexTestResult
+            WHERE AsyncApexJobId = :parentJobId
+        ];
+    }
 
-    // private List<ApexTestQueueItem> getClassTestStatuses(Id parentJobId) {
-    //     return [
-    //         SELECT ApexClass.Name, Status, ExtendedStatus, ParentJobId
-    //         FROM ApexTestQueueItem
-    //         WHERE ParentJobId = :parentJobId
-    //     ];
-    // }
+    /**
+     * Process each unit test's method result and created a related Automated_Test_Job_Results__c
+     * record.
+     */
+    private void processTestResults(Test_Run__c testRun, List<ApexTestResult> apexTestResults) {
+        List<Test_Run_Method_Result__c> results = new List<Test_Run_Method_Result__c>();
 
-    // private List<ApexTestResult> getTestResults(Id parentJobId) {
-    //     return [
-    //         SELECT Outcome, MethodName, Message, StackTrace, AsyncApexJobId, ApexClass.Name
-    //         // ApexClass.Body, ApexClass.LengthWithoutComments, ApexClass.NamespacePrefix, ApexClass.Status, ApexLogId,
-    //         // ApexLog.DurationMilliseconds, ApexLog.Operation, ApexLog.Request, ApexLog.Status, ApexLog.Location, ApexLog.Application
-    //         FROM ApexTestResult
-    //         WHERE AsyncApexJobId = :parentJobId
-    //     ];
-    // }
+        for (ApexTestResult apexTestResult : apexTestResults) {
+            results.add(
+                new Test_Run_Method_Result__c(
+                    Message__c = apexTestResult.message,
+                    Method_Name__c = apexTestResult.MethodName,
+                    Method_Pass__c = apexTestResult.Outcome == 'Pass' ? true : false,
+                    Name = apexTestResult.ApexClass.Name,
+                    Stack_Trace__c = apexTestResult.stackTrace,
+                    Test_Run__c = testRun.Id
+                )
+            );
+        }
 
-    // /**
-    //  * Process each unit test's method result and created a related Automated_Test_Job_Results__c
-    //  * record.
-    //  */
-    // private void processTestResults(List<ApexTestResult> jobTestResults, Id parentJobId) {
-    //     // first clear all old results
-    //     delete [SELECT Id FROM Automated_Test_Job_Results__c];
-
-    //     List<Automated_Test_Job_Results__c> results = new List<Automated_Test_Job_Results__c>();
-
-    //     for (ApexTestResult jobTestResult : jobTestResults) {
-    //         results.add(
-    //             new Automated_Test_Job_Results__c(
-    //                 Message__c = jobTestResult.message,
-    //                 Method_Name__c = jobTestResult.MethodName,
-    //                 Method_Pass__c = jobTestResult.Outcome == 'Pass' ? true : false,
-    //                 Name = jobTestResult.ApexClass.Name,
-    //                 Parent_Job_Id__c = parentJobId,
-    //                 Stack_Trace__c = jobTestResult.stackTrace
-    //             )
-    //         );
-    //     }
-
-    //     insert results;
-    // }
+        insert results;
+    }
 }
