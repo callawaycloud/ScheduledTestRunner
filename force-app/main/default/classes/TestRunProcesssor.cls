@@ -6,12 +6,12 @@
  */
 public with sharing class TestRunProcesssor implements Schedulable {
     public void execute(SchedulableContext SC) {
-        List<Test_Run__c> testRuns = [SELECT Id, Parent_Job_Id__c FROM Test_Run__c WHERE Processed__c = false];
+        List<Test_Run__c> testRuns = [SELECT Id, Parent_Job_Ids__c FROM Test_Run__c WHERE Processed__c = false];
 
         for (Test_Run__c testRun : testRuns) {
-            if (testRun.Parent_Job_Id__c != null && allTestsComplete(testRun.Parent_Job_Id__c)) {
+            if (testRun.Parent_Job_Ids__c != null && allTestsComplete(testRun.Parent_Job_Ids__c)) {
                 // each item of testResults is the actual result of a single test method
-                List<ApexTestResult> testResults = getTestResults(testRun.Parent_Job_Id__c);
+                List<ApexTestResult> testResults = getTestResults(testRun.Parent_Job_Ids__c);
                 processTestResults(testRun, testResults);
 
                 // update the test run
@@ -21,8 +21,8 @@ public with sharing class TestRunProcesssor implements Schedulable {
         }
     }
 
-    private Boolean allTestsComplete(Id parentJobId) {
-        List<ApexTestQueueItem> classTestStatuses = getClassTestStatuses(parentJobId);
+    private Boolean allTestsComplete(String parentJobIds) {
+        List<ApexTestQueueItem> classTestStatuses = getClassTestStatuses(parentJobIds);
 
         if (classTestStatuses == null || classTestStatuses.size() == 0) {
             return false;
@@ -41,11 +41,11 @@ public with sharing class TestRunProcesssor implements Schedulable {
         return true;
     }
 
-    private List<ApexTestQueueItem> getClassTestStatuses(Id parentJobId) {
+    private List<ApexTestQueueItem> getClassTestStatuses(String parentJobIds) {
         List<ApexTestQueueItem> queueItems = [
             SELECT ApexClass.Name, Status, ExtendedStatus, ParentJobId
             FROM ApexTestQueueItem
-            WHERE ParentJobId = :parentJobId
+            WHERE ParentJobId IN :parentJobIds.split(',')
         ];
 
         if (Test.isRunningTest()) {
@@ -60,13 +60,13 @@ public with sharing class TestRunProcesssor implements Schedulable {
         return queueItems;
     }
 
-    private List<ApexTestResult> getTestResults(Id parentJobId) {
+    private List<ApexTestResult> getTestResults(String parentJobIds) {
         List<ApexTestResult> testResults = [
             SELECT Outcome, MethodName, Message, StackTrace, AsyncApexJobId, ApexClass.Name
             // ApexClass.Body, ApexClass.LengthWithoutComments, ApexClass.NamespacePrefix, ApexClass.Status, ApexLogId,
             // ApexLog.DurationMilliseconds, ApexLog.Operation, ApexLog.Request, ApexLog.Status, ApexLog.Location, ApexLog.Application
             FROM ApexTestResult
-            WHERE AsyncApexJobId = :parentJobId
+            WHERE AsyncApexJobId = :parentJobIds.split(',')
         ];
 
         if (Test.isRunningTest()) {

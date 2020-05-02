@@ -15,25 +15,41 @@ public with sharing class TestRunScheduler implements Schedulable {
         List<ApexClass> testClasses = [FIND '@isTest' IN ALL FIELDS RETURNING ApexClass(Id, Name)][0];
 
         if (testClasses.size() > 0) {
-            List<ApexTestQueueItem> queueItems = new List<ApexTestQueueItem>();
+            List<List<ApexTestQueueItem>> queueItems = new List<List<ApexTestQueueItem>>();
+            List<ApexTestQueueItem> innerQueueItems = new List<ApexTestQueueItem>();
+            Integer counter = 0;
+
             for (ApexClass testClass : testClasses) {
-                queueItems.add(new ApexTestQueueItem(ApexClassId = testClass.Id));
+                counter++;
+                innerQueueItems.add(new ApexTestQueueItem(ApexClassId = testClass.Id));
+
+                if (innerQueueItems.size() == 1) {
+                    queueItems.add(innerQueueItems);
+                    innerQueueItems = new List<ApexTestQueueItem>();
+                }
             }
+
+            if (innerQueueItems.size() > 0) {
+                queueItems.add(innerQueueItems);
+            }
+
+            List<Id> parentIds = new List<Id>();
 
             // bulk insert, when bulk inserted they will all contain the same ParentJobId
             if (!Test.isRunningTest()) {
                 // can't queue unit tests while running a test
-                insert queueItems;
-            }
-
-            ApexTestQueueItem queueItem;
-            if (!Test.isRunningTest()) {
-                queueItem = [SELECT ParentJobId FROM ApexTestQueueItem WHERE Id = :queueItems[0].Id LIMIT 1];
+                for (List<ApexTestQueueItem> queueItemsSubset : queueItems) {
+                    insert queueItemsSubset;
+                    parentIds.add(
+                        [SELECT ParentJobId FROM ApexTestQueueItem WHERE Id = :queueItemsSubset[0].Id LIMIT 1][0]
+                        .ParentJobId
+                    );
+                }
             }
 
             Test_Run__c newRun = new Test_Run__c(
                 Name = 'Test Run: ' + String.valueOf(DateTime.now()),
-                Parent_Job_Id__c = Test.isRunningTest() ? 'testingParentJobId' : queueItem.ParentJobId,
+                Parent_Job_Ids__c = Test.isRunningTest() ? 'testingParentJobId' : String.join(parentIds, ','),
                 Processed__c = false
             );
 

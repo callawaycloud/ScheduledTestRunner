@@ -2,11 +2,11 @@
 <Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
     <alerts>
         <fullName>Test_Run_Failure_Notification_Alert</fullName>
-        <ccEmails>update@me.com</ccEmails>
+        <ccEmails>up@me.com</ccEmails>
         <description>Test Run Failure Notification Alert</description>
         <protected>false</protected>
         <senderType>CurrentUser</senderType>
-        <template>unfiled$public/Test_Run_Notification</template>
+        <template>Test_Runner_Email_Templates/Test_Run_Notification</template>
     </alerts>
     <rules>
         <fullName>Send Test Run Failure Notification</fullName>

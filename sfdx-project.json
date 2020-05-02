@@ -4,8 +4,8 @@
             "path": "force-app",
             "default": true,
             "package": "TestRunner",
-            "versionName": "ver 0.1",
-            "versionNumber": "0.1.0.NEXT"
+            "versionName": "ver 0.3",
+            "versionNumber": "0.1.2.NEXT"
         }
     ],
     "namespace": "",
@@ -13,6 +13,11 @@
     "sourceApiVersion": "45.0",
     "packageAliases": {
         "TestRunner": "0Ho1C000000002bSAA",
-        "TestRunner@0.1.0-1": "04t1C000000goM5QAI"
+        "TestRunner@0.1.0-1": "04t1C000000goM5QAI",
+        "TestRunner@0.1.1-1": "04t1C000000lI7HQAU",
+        "TestRunner@0.1.2-1": "04t1C000000lI7MQAU",
+        "TestRunner@0.1.2-2": "04t1C000000lI7RQAU",
+        "TestRunner@0.1.2-3": "04t1C000000lI7WQAU",
+        "TestRunner@0.1.2-4": "04t1C000000lI7bQAE"
     }
 }
