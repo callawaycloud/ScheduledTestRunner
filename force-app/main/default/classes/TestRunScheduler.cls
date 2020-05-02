@@ -23,7 +23,7 @@ public with sharing class TestRunScheduler implements Schedulable {
                 counter++;
                 innerQueueItems.add(new ApexTestQueueItem(ApexClassId = testClass.Id));
 
-                if (innerQueueItems.size() == 1) {
+                if (innerQueueItems.size() == 200) {
                     queueItems.add(innerQueueItems);
                     innerQueueItems = new List<ApexTestQueueItem>();
                 }
@@ -34,16 +34,22 @@ public with sharing class TestRunScheduler implements Schedulable {
             }
 
             List<Id> parentIds = new List<Id>();
+            Set<Id> testQueueIds = new Set<Id>();
 
             // bulk insert, when bulk inserted they will all contain the same ParentJobId
             if (!Test.isRunningTest()) {
                 // can't queue unit tests while running a test
                 for (List<ApexTestQueueItem> queueItemsSubset : queueItems) {
                     insert queueItemsSubset;
-                    parentIds.add(
-                        [SELECT ParentJobId FROM ApexTestQueueItem WHERE Id = :queueItemsSubset[0].Id LIMIT 1][0]
-                        .ParentJobId
-                    );
+                    testQueueIds.add(queueItemsSubset[0].Id);
+                }
+
+                for (ApexTestQueueItem queueItem : [
+                    SELECT ParentJobId
+                    FROM ApexTestQueueItem
+                    WHERE Id IN :testQueueIds
+                ]) {
+                    parentIds.add(queueItem.ParentJobId);
                 }
             }
 

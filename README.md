@@ -2,43 +2,67 @@
 
 A Salesforce package for knowing the current status of your organization's unit tests.
 
-maximus / todo test runs kept for 30 days, then deleted
+Some notes:
+
+-   scheduled to run at your own frequency
+-   test runs pruned after 30 days of age
 
 ## Install
 
-https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1C000000lI7HQAU
+https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1C000000lI7lQAE
 
 ## Setup
 
-### send notifications
+### Send Notifications
 
-Update Workflow Action: Test Run Failure Notification Alert, to include your email addresses
-Activate : Send Test Run Failure Notification
+Optional notifications, currently via email only:
+
+-   Update Workflow Action "Test Run Failure Notification Alert", to include your email addresses
+-   Activate workflow "Send Test Run Failure Notification"
 
 ### Scheduling
 
-Schedule scheduler
+Schedule the unit test run frequency (example below runs daily at 3am):
 
 ```
-
+TestRunScheduler testRunner = new TestRunScheduler();
+String sch = '0 3 * * * ?'; // schedule interval time
+System.Schedule('Test Runner', sch, testRunner);
 ```
 
-Schedule
+Schedule the processor to check for finished test runs hourly:
 
 ```
-
+TestRunProcesssor testProcessor = new TestRunProcesssor();
+String sch = '0 0 * * * ?'; // schedule interval time
+System.Schedule('Test Processor', sch, testProcessor);
 ```
+
+Tip: based on this setup you schedule TestRunScheduler an hour before you want it to be processed.
 
 ## Uninstall
 
-TODO
+Please check Salesforce's direction here: https://help.salesforce.com/articleView?id=distribution_uninstalling_packages.htm&type=5
+
+Brief steps:
+
+-   setup
+-   search for "Installed Packages"
+-   find Test Runner, click uninstall
 
 ## Developer Notes
 
 ### release new version
 
--   sfdx force:package:version:create -p TestRunner -d force-app -x --wait 10 -v CCC-SFDC-Production
+Make your updates, release a new version:
 
-### promote
+-   open `sfdx-project.json`
+    -   increment `versionName` and `versionNumber` respectively
+    -   save
+-   `sfdx force:package:version:create -p TestRunner -d force-app -x --wait 10 -v CCC-SFDC-Production`
 
--   sfdx force:package:version:promote -p 04t\*
+### Promote
+
+Once you are ready to release the updated package, use the 04t* Id from the new release to promote:
+
+-   `sfdx force:package:version:promote -p 04t\*`
