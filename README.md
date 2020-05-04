@@ -9,14 +9,16 @@ Some notes:
 
 ## Install
 
-https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1C000000lI7lQAE
+https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1C000000lIByQAM
 
 ## Setup
 
 ### Send Notifications
 
-Optional notifications, currently via email only:
+Optional notifications, currently via workflow emails only:
 
+-   `sfdx force:source:convert -r notifications/workflow-email -d ./dist/workflow-email`
+-   `sfdx force:mdapi:deploy -d .\dist\workflow-email\`
 -   Update Workflow Action "Test Run Failure Notification Alert", to include your email addresses
 -   Activate workflow "Send Test Run Failure Notification"
 
@@ -26,11 +28,11 @@ Schedule the unit test run frequency (example below runs daily at 3am):
 
 ```
 TestRunScheduler testRunner = new TestRunScheduler();
-String sch = '0 3 * * * ?'; // schedule interval time
+String sch = '0 0 3 * * ?'; // schedule interval time
 System.Schedule('Test Runner', sch, testRunner);
 ```
 
-Schedule the processor to check for finished test runs hourly:
+Schedule the processor to check for finished test runs hourly, or more often if you want:
 
 ```
 TestRunProcesssor testProcessor = new TestRunProcesssor();
@@ -63,6 +65,7 @@ Make your updates, release a new version:
 
 ### Promote
 
-Once you are ready to release the updated package, use the 04t* Id from the new release to promote:
+Once you are ready to release the updated package, use the 04t\* Id from the new release to promote:
 
 -   `sfdx force:package:version:promote -p 04t\*`
+-   update `README.mdd` install step with the new install URL
