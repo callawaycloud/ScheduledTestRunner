@@ -36,7 +36,7 @@ System.Schedule('Test Processor', sch, testProcessor);
 
 **NOTES:**
 
--   If you find your test runs are failing inconsistently, try [disabling "parallel" test runs](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_testing_best_practices.htm)
+-   If you find your test runs are failing inconsistently, you may need to [disabling "parallel" test runs](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_testing_best_practices.htm)
 
 ### Sending Notifications
 
