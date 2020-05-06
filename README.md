@@ -1,26 +1,18 @@
 # Scheduled Test Runner
 
-A Salesforce package for knowing the current status of your organization's unit tests.
+A Salesforce package to help monitor organization's unit tests health.
 
-Some notes:
-
--   scheduled to run at your own frequency
--   test runs pruned after 30 days of age
+-   Setup to run via scheduled process
+-   Test results are store in objects
+    -   `Test_Run__c`: A test Job instance
+    -   `Test_Run_Method_Result__c`: An individual test method result
+-   Test results are pruned after 30 days
 
 ## Install
 
-https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1C000000lIByQAM
+[Unlocked Package Install Link](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1C000000lICDQA2)
 
 ## Setup
-
-### Send Notifications
-
-Optional notifications, currently via workflow emails only:
-
--   `sfdx force:source:convert -r notifications/workflow-email -d ./dist/workflow-email`
--   `sfdx force:mdapi:deploy -d .\dist\workflow-email\`
--   Update Workflow Action "Test Run Failure Notification Alert", to include your email addresses
--   Activate workflow "Send Test Run Failure Notification"
 
 ### Scheduling
 
@@ -32,15 +24,31 @@ String sch = '0 0 3 * * ?'; // schedule interval time
 System.Schedule('Test Runner', sch, testRunner);
 ```
 
-Schedule the processor to check for finished test runs hourly, or more often if you want:
+Schedule the processor to check for finished test runs hourly (or more often if you want):
 
 ```
-TestRunProcesssor testProcessor = new TestRunProcesssor();
-String sch = '0 0 * * * ?'; // schedule interval time
+TestRunProcessor testProcessor = new TestRunProcessor();
+String sch = '0 15 * * * ?'; // schedule interval time
 System.Schedule('Test Processor', sch, testProcessor);
 ```
 
 Tip: based on this setup you schedule TestRunScheduler an hour before you want it to be processed.
+
+### Sending Notifications
+
+To keep things as flexible & upgradable possible, we've decided not to package any notification logic with the "unlocked" package.
+
+Since the results are stored in an object, you can you use tool of choice to receive notifications about failures.
+
+However, we have included a simple workflow to send an email when a test fails.
+
+**To install workflow email alert:**
+
+-   run `sfdx force:source:convert -r notifications/workflow-email -d ./dist/workflow-email` to create a metadata package
+-   run `sfdx force:mdapi:deploy -d .\dist\workflow-email\` to deploy
+-   Update Workflow Action "Test Run Failure Notification Alert", to include your email addresses
+
+We may add more prebuilt notification methods in the future.
 
 ## Uninstall
 
@@ -48,13 +56,12 @@ Please check Salesforce's direction here: https://help.salesforce.com/articleVie
 
 Brief steps:
 
--   setup
--   search for "Installed Packages"
--   find Test Runner, click uninstall
+-   setup -> Installed Packages ->
+-   click uninstall
 
-## Developer Notes
+## Development
 
-### release new version
+### Releasing a new version
 
 Make your updates, release a new version:
 

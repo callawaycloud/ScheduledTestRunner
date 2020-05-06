@@ -4,8 +4,8 @@
             "path": "force-app",
             "default": true,
             "package": "TestRunner",
-            "versionName": "ver 0.5",
-            "versionNumber": "0.1.4.NEXT"
+            "versionName": "ver 0.6",
+            "versionNumber": "0.1.5.NEXT"
         },
         {
             "path": "notifications/workflow-email"
@@ -24,6 +24,8 @@
         "TestRunner@0.1.2-4": "04t1C000000lI7bQAE",
         "TestRunner@0.1.2-5": "04t1C000000lI7gQAE",
         "TestRunner@0.1.2-6": "04t1C000000lI7lQAE",
-        "TestRunner@0.1.4-1": "04t1C000000lIByQAM"
+        "TestRunner@0.1.4-1": "04t1C000000lIByQAM",
+        "TestRunner@0.1.4-2": "04t1C000000lIC8QAM",
+        "TestRunner@0.1.5-1": "04t1C000000lICDQA2"
     }
 }

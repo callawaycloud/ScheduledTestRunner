@@ -4,7 +4,7 @@
  *  - and if the test run is complete it will fire off actions to handle and
  *      parse the results.
  */
-public with sharing class TestRunProcesssor implements Schedulable {
+public with sharing class TestRunProcessor implements Schedulable {
     public void execute(SchedulableContext SC) {
         List<Test_Run__c> testRuns = [SELECT Id, Parent_Job_Ids__c FROM Test_Run__c WHERE Processed__c = false];
 
@@ -51,7 +51,7 @@ public with sharing class TestRunProcesssor implements Schedulable {
         if (Test.isRunningTest()) {
             queueItems.add(
                 (ApexTestQueueItem) JSON.deserialize(
-                    '{"ApexClass.Name":"TestRunProcesssorTest","Status":"Completed"}',
+                    '{"ApexClass.Name":"TestRunProcessorTest","Status":"Completed"}',
                     ApexTestQueueItem.class
                 )
             );

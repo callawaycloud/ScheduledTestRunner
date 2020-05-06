@@ -4,7 +4,7 @@
  * Each execution of the org's unit tests will have a parent job id,
  * this is stored in Test_Run__c.
  *
- * TestRunProcesssor.cls, also scheduleable, checks the status of the test
+ * TestRunProcessor.cls, also scheduleable, checks the status of the test
  * run. When it is complete it'll fire off and check the results.
  *
  * TLDR; this class starts the org's unit tests, but does nothing with the results.
