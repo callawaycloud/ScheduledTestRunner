@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <alerts>
+        <fullName>Test_Run_Failure_Notification_Alert</fullName>
+        <ccEmails>replace@me.com</ccEmails>
+        <description>Test Run Failure Notification Alert</description>
+        <protected>false</protected>
+        <senderType>CurrentUser</senderType>
+        <template>Test_Runner_Email_Templates/Test_Run_Notification</template>
+    </alerts>
+    <rules>
+        <fullName>Send Test Run Failure Notification</fullName>
+        <actions>
+            <name>Test_Run_Failure_Notification_Alert</name>
+            <type>Alert</type>
+        </actions>
+        <active>true</active>
+        <criteriaItems>
+            <field>Test_Run__c.Test_Failures__c</field>
+            <operation>greaterThan</operation>
+            <value>0</value>
+        </criteriaItems>
+        <triggerType>onCreateOrTriggeringUpdate</triggerType>
+    </rules>
+</Workflow>

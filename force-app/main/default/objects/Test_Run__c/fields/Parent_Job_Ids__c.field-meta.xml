@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
-    <fullName>Job_Id__c</fullName>
-    <description>The AsyncJob Id for this test execution</description>
+    <fullName>Parent_Job_Ids__c</fullName>
+    <caseSensitive>false</caseSensitive>
     <externalId>true</externalId>
-    <inlineHelpText>The AsyncJob Id for this test execution</inlineHelpText>
-    <label>Job Id</label>
+    <label>Parent Job Ids</label>
     <length>255</length>
     <required>true</required>
     <trackTrending>false</trackTrending>
     <type>Text</type>
-    <unique>false</unique>
+    <unique>true</unique>
 </CustomField>
+

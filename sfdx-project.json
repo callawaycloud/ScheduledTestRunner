@@ -1,11 +1,31 @@
 {
-  "packageDirectories": [
-    {
-      "path": "force-app",
-      "default": true
+    "packageDirectories": [
+        {
+            "path": "force-app",
+            "default": true,
+            "package": "TestRunner",
+            "versionName": "ver 0.6",
+            "versionNumber": "0.1.5.NEXT"
+        },
+        {
+            "path": "notifications/workflow-email"
+        }
+    ],
+    "namespace": "",
+    "sfdcLoginUrl": "https://login.salesforce.com",
+    "sourceApiVersion": "45.0",
+    "packageAliases": {
+        "TestRunner": "0Ho1C000000002bSAA",
+        "TestRunner@0.1.0-1": "04t1C000000goM5QAI",
+        "TestRunner@0.1.1-1": "04t1C000000lI7HQAU",
+        "TestRunner@0.1.2-1": "04t1C000000lI7MQAU",
+        "TestRunner@0.1.2-2": "04t1C000000lI7RQAU",
+        "TestRunner@0.1.2-3": "04t1C000000lI7WQAU",
+        "TestRunner@0.1.2-4": "04t1C000000lI7bQAE",
+        "TestRunner@0.1.2-5": "04t1C000000lI7gQAE",
+        "TestRunner@0.1.2-6": "04t1C000000lI7lQAE",
+        "TestRunner@0.1.4-1": "04t1C000000lIByQAM",
+        "TestRunner@0.1.4-2": "04t1C000000lIC8QAM",
+        "TestRunner@0.1.5-1": "04t1C000000lICDQA2"
     }
-  ],
-  "namespace": "",
-  "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "45.0"
 }
