@@ -2,6 +2,8 @@
 
 A Salesforce package to help monitor organization's unit tests health.
 
+<img width="1264" alt="Test_Run__2020-05-05_03_00_07___Salesforce" src="https://user-images.githubusercontent.com/5217568/81127689-3c223900-8efc-11ea-94ab-7bfb34a4c957.png">
+
 -   Setup to run via scheduled process
 -   Test results are store in objects
     -   `Test_Run__c`: A test Job instance
