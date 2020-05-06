@@ -18,7 +18,7 @@ A Salesforce package to help monitor organization's unit tests health.
 
 Schedule the unit test run frequency (example below runs daily at 3am):
 
-```
+```java
 TestRunScheduler testRunner = new TestRunScheduler();
 String sch = '0 0 3 * * ?'; // schedule interval time
 System.Schedule('Test Runner', sch, testRunner);
@@ -26,7 +26,7 @@ System.Schedule('Test Runner', sch, testRunner);
 
 Schedule the processor to check for finished test runs hourly (or more often if you want):
 
-```
+```java
 TestRunProcessor testProcessor = new TestRunProcessor();
 String sch = '0 15 * * * ?'; // schedule interval time
 System.Schedule('Test Processor', sch, testProcessor);
