@@ -103,11 +103,40 @@ public with sharing class TestRunProcessor implements Schedulable {
                     Method_Pass__c = apexTestResult.Outcome == 'Pass' ? true : false,
                     Name = apexTestResult.ApexClass.Name,
                     Stack_Trace__c = apexTestResult.stackTrace,
-                    Test_Run__c = testRun.Id
+                    Test_Run__c = testRun.Id 
                 )
             );
+            
         }
-
-        insert results;
+        
+		List<Test_Run_Method_Result__c> result = processPassFailDates(results);
+        insert result;
+    }
+    
+    private List<Test_Run_Method_Result__c> processPassFailDates(List<Test_Run_Method_Result__c> result) {
+        List<String> failedTests = new List<String>();
+        for (Test_Run_Method_Result__c r : result) {
+            if (!r.Method_Pass__c) {
+                failedTests.add(r.Method_Name__c);
+            }
+        }      
+        List<Test_Run_Method_Result__c> failedCousins = [SELECT Id, Method_Name__c, Method_Pass__c, CreatedDate FROM Test_Run_Method_Result__c 
+                                                   WHERE Method_Name__c IN :failedTests ORDER BY CreatedDate DESC];
+        
+        for (Test_Run_Method_Result__c r : result) {
+            if (!r.Method_Pass__c) {
+                r.First_Failure__c = r.CreatedDate;
+                for (Test_Run_Method_Result__c f : failedCousins) {
+                    if (r.Method_Name__c == f.Method_Name__c && !f.Method_Pass__c) {
+                        r.First_Failure__c = f.CreatedDate;
+                    }
+                    if (r.Method_Name__c == f.Method_Name__c && f.Method_Pass__c) {
+                        r.Last_Success__c = f.CreatedDate;
+                        break;
+                    }
+                }    
+            }
+        }
+    	return result;  
     }
 }

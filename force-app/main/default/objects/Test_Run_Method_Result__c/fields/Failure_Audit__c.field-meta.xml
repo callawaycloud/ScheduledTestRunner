@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Failure_Audit__c</fullName>
+    <description>Displays SOQL query for failed test audit</description>
+    <externalId>false</externalId>
+    <formula>IF(Method_Pass__c == false,
+&quot;[SELECT Id, Action, CreatedBy.Name, CreatedDate, Display, Section FROM SetupAuditTrail WHERE CreatedDate &gt; &quot; &amp; TEXT(Last_Success__c) &amp; &quot; AND CreatedDate &lt; &quot; &amp; TEXT(First_Failure__c) &amp; &quot;]&quot;,
+&quot;Method Passed&quot;
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <label>Failure Audit</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+    <unique>false</unique>
+</CustomField>
