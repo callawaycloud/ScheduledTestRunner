@@ -12,9 +12,19 @@ private class TestRunProcessorTest {
             Processed__c = false
         );
         insert testRun;
-
+        TestRunProcessor testProcessor = new TestRunProcessor();
+        testProcessor.testResults = new List<ApexTestResult>{
+            new ApexTestResult(
+                Outcome = 'asdf',
+                MethodName = 'asdf',
+                Message = 'asdf',
+                StackTrace = 'asdf',
+                AsyncApexJobId = testRun.Parent_Job_Ids__c,
+                ApexClass = new ApexClass(Name = 'asdf')
+            )
+        };
         Test.StartTest();
-        System.schedule('Automated Test Job Queuer [UNIT TESTING]', '0 0 23 * * ?', new TestRunProcessor());
+        System.schedule('Automated Test Job Queuer [UNIT TESTING]', '0 0 23 * * ?', testProcessor);
         Test.stopTest();
     }
 }

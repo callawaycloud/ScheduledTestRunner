@@ -5,15 +5,17 @@
  *      parse the results.
  */
 public with sharing class TestRunProcessor implements Schedulable {
+    @testVisible
+    private List<ApexTestResult> testResults;
+
     public void execute(SchedulableContext SC) {
         List<Test_Run__c> testRuns = [SELECT Id, Parent_Job_Ids__c FROM Test_Run__c WHERE Processed__c = false];
 
         for (Test_Run__c testRun : testRuns) {
             if (testRun.Parent_Job_Ids__c != null && allTestsComplete(testRun.Parent_Job_Ids__c)) {
                 // each item of testResults is the actual result of a single test method
-                List<ApexTestResult> testResults = getTestResults(testRun.Parent_Job_Ids__c);
+                getTestResults(testRun.Parent_Job_Ids__c);
                 processTestResults(testRun, testResults);
-
                 // update the test run
                 testRun.Processed__c = true;
                 update testRun;
@@ -60,32 +62,18 @@ public with sharing class TestRunProcessor implements Schedulable {
         return queueItems;
     }
 
-    private List<ApexTestResult> getTestResults(String parentJobIds) {
-        List<ApexTestResult> testResults = [
-            SELECT Outcome, MethodName, Message, StackTrace, AsyncApexJobId, ApexClass.Name
-            // ApexClass.Body, ApexClass.LengthWithoutComments, ApexClass.NamespacePrefix, ApexClass.Status, ApexLogId,
-            // ApexLog.DurationMilliseconds, ApexLog.Operation, ApexLog.Request, ApexLog.Status, ApexLog.Location, ApexLog.Application
-            FROM ApexTestResult
-            WHERE AsyncApexJobId = :parentJobIds.split(',')
-        ];
-
-        if (Test.isRunningTest()) {
-            testResults.add(
-                (ApexTestResult) JSON.deserialize(
-                    '{' +
-                    '"Outcome":"asdf",' +
-                    '"MethodName":"asdf",' +
-                    '"Message":"asdf",' +
-                    '"StackTrace":"asdf",' +
-                    '"AsyncApexJobId":"asdf",' +
-                    '"ApexClass.Name":"asdf"' +
-                    '}',
-                    ApexTestResult.class
-                )
-            );
+    private void getTestResults(String parentJobIds) {
+        if (!Test.isRunningTest()) {
+            testResults = [
+                SELECT Outcome, MethodName, Message, StackTrace, AsyncApexJobId, ApexClass.Name
+                // ApexClass.Body, ApexClass.LengthWithoutComments, ApexClass.NamespacePrefix, ApexClass.Status, ApexLogId,
+                // ApexLog.DurationMilliseconds, ApexLog.Operation, ApexLog.Request, ApexLog.Status, ApexLog.Location, ApexLog.Application
+                FROM ApexTestResult
+                WHERE AsyncApexJobId = :parentJobIds.split(',')
+            ];
         }
 
-        return testResults;
+    
     }
 
     /**
@@ -107,47 +95,44 @@ public with sharing class TestRunProcessor implements Schedulable {
                 )
             );
         }
-
-        List<Test_Run_Method_Result__c> result = processPassFailDates(results);
-        insert result;
+        processPassFailDates(results);
+        insert results;
     }
 
-    private List<Test_Run_Method_Result__c> processPassFailDates(List<Test_Run_Method_Result__c> result) {
-        Map<String, List<Test_Run_Method_Result__c>> failedTests = new Map<String, List<Test_Run_Method_Result__c>>();
+    private void processPassFailDates(List<Test_Run_Method_Result__c> result) {
+        Map<String, List<Test_Run_Method_Result__c>> previousResultsMap = new Map<String, List<Test_Run_Method_Result__c>>();
+        List<Test_Run_Method_Result__c> failedTests = new List<Test_Run_Method_Result__c>();
         for (Test_Run_Method_Result__c r : result) {
             if (!r.Method_Pass__c) {
-                failedTests.put(r.Method_Name__c, new List<Test_Run_Method_Result__c>());
+                failedTests.add(r);
+                previousResultsMap.put(r.Method_Name__c, new List<Test_Run_Method_Result__c>());
             }
         }
-        List<Test_Run_Method_Result__c> failedCousins = [
+        List<Test_Run_Method_Result__c> previousResults = [
             SELECT Id, Method_Name__c, Method_Pass__c, CreatedDate
             FROM Test_Run_Method_Result__c
-            WHERE Method_Name__c IN :failedTests.keySet()
+            WHERE Method_Name__c IN :previousResultsMap.keySet()
             ORDER BY CreatedDate DESC
         ];
 
-        for (Test_Run_Method_Result__c f : failedCousins) {
-            if (failedTests.containsKey(f.Method_Name__c)) {
-                List<Test_Run_Method_Result__c> tempList = failedTests.get(f.Method_Name__c);
+        for (Test_Run_Method_Result__c f : previousResults) {
+            if (previousResultsMap.containsKey(f.Method_Name__c)) {
+                List<Test_Run_Method_Result__c> tempList = previousResultsMap.get(f.Method_Name__c);
                 tempList.add(f);
-                failedTests.put(f.Method_Name__c, tempList);
             }
         }
 
-        for (Test_Run_Method_Result__c r : result) {
-            if (!r.Method_Pass__c) {
-                r.First_Failure__c = r.CreatedDate;
-                for (Test_Run_Method_Result__c f : failedTests.get(r.Method_Name__c)) {
-                    if (r.Method_Name__c == f.Method_Name__c && !f.Method_Pass__c) {
-                        r.First_Failure__c = f.CreatedDate;
-                    }
-                    if (r.Method_Name__c == f.Method_Name__c && f.Method_Pass__c) {
-                        r.Last_Success__c = f.CreatedDate;
-                        break;
-                    }
+        for (Test_Run_Method_Result__c failure : failedTests) {
+            failure.First_Failure__c = failure.CreatedDate;
+            for (Test_Run_Method_Result__c previousResult : previousResultsMap.get(failure.Method_Name__c)) {
+                if (failure.Method_Name__c == previousResult.Method_Name__c && !previousResult.Method_Pass__c) {
+                    failure.First_Failure__c = previousResult.CreatedDate;
+                }
+                if (failure.Method_Name__c == previousResult.Method_Name__c && previousResult.Method_Pass__c) {
+                    failure.Last_Success__c = previousResult.CreatedDate;
+                    break;
                 }
             }
         }
-        return result;
     }
 }
