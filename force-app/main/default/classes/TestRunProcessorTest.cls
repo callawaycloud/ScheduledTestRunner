@@ -6,7 +6,7 @@ private class TestRunProcessorTest {
     @isTest
     public static void testQueuer() {
         TestRunProcessor testProcessor = new TestRunProcessor();
-        testProcessor.testResults = generateTestResults();
+        testProcessor.testResults = generateApexTestResults();
 
         Test.StartTest();
         System.schedule('Automated Test Job Queuer [UNIT TESTING]', '0 0 23 * * ?', testProcessor);
@@ -21,16 +21,22 @@ private class TestRunProcessorTest {
 
         Test.stopTest();
     }
-
+    /**
+     * Tests processPassFailDates() uses fake test "PassFailProccess" named
+     * in Test Generator classes below.
+     */
     @isTest
     public static void PassFailProcessorTest() {
-        generateTestRunResults();
+        List<Test_Run_Method_Result__c> pastTestResults = generatePastTestRunResults();
+        insert pastTestResults;
+
         //wait a second
         Integer start = System.Now().second();
         while (System.Now().second() < start + 1) {
         }
+
         TestRunProcessor testProcessor = new TestRunProcessor();
-        testProcessor.testResults = generateTestResults();
+        testProcessor.testResults = generateApexTestResults();
 
         Test.StartTest();
         testProcessor.execute(null);
@@ -60,11 +66,14 @@ private class TestRunProcessorTest {
 
         Test.stopTest();
     }
-
-    private static List<ApexTestResult> generateTestResults() {
-        List<ApexClass> classes = [SELECT Id, Name, Body FROM ApexClass WHERE Name = 'TestRunProcessorTest'];
-
-        Test_Run__c testRun = new Test_Run__c(Parent_Job_Ids__c = '7073t00005OHeNPCA1', Processed__c = false);
+    /**
+     * Generates a List of ApexTestResult and returns them.
+     * Also inserts a List of Test_Run__c records to mock seperate runs and for id purposes
+     */
+    private static List<ApexTestResult> generateApexTestResults() {
+        List<Test_Run__c> testRun = new List<Test_Run__c>{
+            new Test_Run__c(Parent_Job_Ids__c = '7073t00005OHeNPCA1', Processed__c = false)
+        };
         insert testRun;
         List<ApexTestResult> testResults = new List<ApexTestResult>{
             new ApexTestResult(
@@ -72,7 +81,7 @@ private class TestRunProcessorTest {
                 MethodName = 'Test1',
                 Message = 'asdf',
                 StackTrace = 'asdf',
-                AsyncApexJobId = testRun.Parent_Job_Ids__c,
+                AsyncApexJobId = testRun[0].Parent_Job_Ids__c,
                 ApexClass = new ApexClass(Name = 'Generic')
             ),
             new ApexTestResult(
@@ -80,13 +89,17 @@ private class TestRunProcessorTest {
                 MethodName = 'Test2',
                 Message = 'asdf',
                 StackTrace = 'asdf',
-                AsyncApexJobId = testRun.Parent_Job_Ids__c,
+                AsyncApexJobId = testRun[0].Parent_Job_Ids__c,
                 ApexClass = new ApexClass(Name = 'PassFailProccess')
             )
         };
         return testResults;
     }
-    private static void generateTestRunResults() {
+    /**
+     * Generates a List of Test_Run_Method_Restult__c and inserts them.
+     * Also inserts a List of Test_Run__c records to mock seperate runs and for id purposes
+     */
+    private static List<Test_Run_Method_Result__c> generatePastTestRunResults() {
         List<Test_Run__c> testRun = new List<Test_Run__c>{
             new Test_Run__c(Parent_Job_Ids__c = '7073t00005OHeNPAA1', Processed__c = true),
             new Test_Run__c(Parent_Job_Ids__c = '7073t00005OHbgxAAD', Processed__c = true)
@@ -110,6 +123,6 @@ private class TestRunProcessorTest {
                 Test_Run__c = testRun[1].Id
             )
         };
-        insert testRunResults;
+        return testRunResults;
     }
 }
