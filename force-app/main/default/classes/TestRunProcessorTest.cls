@@ -58,10 +58,11 @@ private class TestRunProcessorTest {
             System.debug('Pass Fail: ' + tr.Method_Pass__c);
             System.debug('Date: ' + tr.CreatedDate);
             System.debug('Audit: ' + tr.Failure_Audit__c);
+            System.debug('First Fail: ' + tr.First_Failure__c);
         }
 
         System.assertEquals('Test2', processorResults[0].Method_Name__c);
-        System.assertNotEquals(processorResults[0].CreatedDate, processorResults[0].First_Failure__c);
+        System.assertNotEquals(null, processorResults[0].First_Failure__c);
         System.assertEquals('Method Passed', processorResults[2].Failure_Audit__c);
 
         Test.stopTest();
@@ -109,7 +110,7 @@ private class TestRunProcessorTest {
             new Test_Run_Method_Result__c(
                 Message__c = 'asdf',
                 Method_Name__c = 'Test2',
-                Method_Pass__c = false,
+                Method_Pass__c = true,
                 Name = 'PassFailProccess',
                 Stack_Trace__c = 'asdf',
                 Test_Run__c = testRun[0].Id

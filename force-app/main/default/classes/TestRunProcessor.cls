@@ -72,8 +72,6 @@ public with sharing class TestRunProcessor implements Schedulable {
                 WHERE AsyncApexJobId = :parentJobIds.split(',')
             ];
         }
-
-    
     }
 
     /**
@@ -123,7 +121,7 @@ public with sharing class TestRunProcessor implements Schedulable {
         }
 
         for (Test_Run_Method_Result__c failure : failedTests) {
-            failure.First_Failure__c = failure.CreatedDate;
+            failure.First_Failure__c = Datetime.now();
             for (Test_Run_Method_Result__c previousResult : previousResultsMap.get(failure.Method_Name__c)) {
                 if (failure.Method_Name__c == previousResult.Method_Name__c && !previousResult.Method_Pass__c) {
                     failure.First_Failure__c = previousResult.CreatedDate;
