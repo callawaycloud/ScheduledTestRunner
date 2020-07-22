@@ -80,7 +80,6 @@ public with sharing class TestRunProcessor implements Schedulable {
      */
     private void processTestResults(Test_Run__c testRun, List<ApexTestResult> apexTestResults) {
         List<Test_Run_Method_Result__c> results = new List<Test_Run_Method_Result__c>();
-
         for (ApexTestResult apexTestResult : apexTestResults) {
             results.add(
                 new Test_Run_Method_Result__c(
@@ -93,18 +92,22 @@ public with sharing class TestRunProcessor implements Schedulable {
                 )
             );
         }
-        processPassFailDates(results);
+        List<Test_Run_Method_Result__c> failedTests = new List<Test_Run_Method_Result__c>();
+        for (Test_Run_Method_Result__c r : results) {
+            if (!r.Method_Pass__c) {
+                failedTests.add(r);
+            }
+        }
+        processPassFailDates(failedTests);
+        createFailureSummary(testRun, failedTests);
+
         insert results;
     }
 
-    private void processPassFailDates(List<Test_Run_Method_Result__c> result) {
+    private void processPassFailDates(List<Test_Run_Method_Result__c> failedTests) {
         Map<String, List<Test_Run_Method_Result__c>> previousResultsMap = new Map<String, List<Test_Run_Method_Result__c>>();
-        List<Test_Run_Method_Result__c> failedTests = new List<Test_Run_Method_Result__c>();
-        for (Test_Run_Method_Result__c r : result) {
-            if (!r.Method_Pass__c) {
-                failedTests.add(r);
-                previousResultsMap.put(r.Method_Name__c, new List<Test_Run_Method_Result__c>());
-            }
+        for (Test_Run_Method_Result__c r : failedTests) {
+            previousResultsMap.put(r.Method_Name__c, new List<Test_Run_Method_Result__c>());
         }
         List<Test_Run_Method_Result__c> previousResults = [
             SELECT Id, Method_Name__c, Method_Pass__c, CreatedDate
@@ -122,8 +125,10 @@ public with sharing class TestRunProcessor implements Schedulable {
 
         for (Test_Run_Method_Result__c failure : failedTests) {
             failure.First_Failure__c = Datetime.now();
+            failure.New_Failure__c = true;
             for (Test_Run_Method_Result__c previousResult : previousResultsMap.get(failure.Method_Name__c)) {
                 if (failure.Method_Name__c == previousResult.Method_Name__c && !previousResult.Method_Pass__c) {
+                    failure.New_Failure__c = false;
                     failure.First_Failure__c = previousResult.CreatedDate;
                 }
                 if (failure.Method_Name__c == previousResult.Method_Name__c && previousResult.Method_Pass__c) {
@@ -131,6 +136,30 @@ public with sharing class TestRunProcessor implements Schedulable {
                     break;
                 }
             }
+        }
+    }
+
+    private void createFailureSummary(Test_Run__c testRun, List<Test_Run_Method_Result__c> failedTests) {
+        List<String> failureMessages = new List<String>();
+        for (Test_Run_Method_Result__c result : failedTests) {
+            if (result.New_Failure__c) {
+                failureMessages.add(
+                    '**  CLASS: ' +
+                    result.Name +
+                    '  **\n' +
+                    'METHOD NAME: ' +
+                    result.Method_Name__c +
+                    '\n' +
+                    'STACK TRACE: ' +
+                    result.Stack_Trace__c +
+                    '\n'
+                );
+            }
+        }
+        if (!failureMessages.isEmpty()) {
+            String failureSummary = String.join(failureMessages, '\n');
+            testRun.Failure_Summary__c = failureSummary;
+            update testRun;
         }
     }
 }
