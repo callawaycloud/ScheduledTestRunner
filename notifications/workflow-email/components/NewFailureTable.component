@@ -1,0 +1,25 @@
+<apex:component controller="TestRunEmailController" access="global">
+    <apex:attribute name="TRId" type="Id" description="Id of Test Run" assignTo="{!testRunId}" />
+    <table border="1" cellspacing="1">
+        <tr style="text-align:center;font-size:12pt;background-color: #72A2C0">
+            <td>
+                <b>Failed Test</b>
+            </td>
+            <td>
+                <b>Error Message</b>
+            </td>
+            <td>
+                <b>Run Time</b>
+            </td>
+        </tr>
+        <apex:repeat value="{!MethodResults}" var="result">
+            <tr style="font-size:10pt;background-color: #e6e6e6">
+                <td>
+                    <a href="{!baseURL}/{!result.Id} ">{!result.Name}.{!result.Method_Name__c}</a>
+                </td>
+                <td>{!result.Message__c}</td>
+                <td>{!result.Run_Time__c}</td>
+            </tr>
+        </apex:repeat>
+    </table>
+</apex:component>

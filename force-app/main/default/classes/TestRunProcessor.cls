@@ -65,7 +65,7 @@ public with sharing class TestRunProcessor implements Schedulable {
     private void getTestResults(String parentJobIds) {
         if (!Test.isRunningTest()) {
             testResults = [
-                SELECT Outcome, MethodName, Message, StackTrace, AsyncApexJobId, ApexClass.Name
+                SELECT Outcome, MethodName, Message, StackTrace, AsyncApexJobId, ApexClass.Name, RunTime
                 // ApexClass.Body, ApexClass.LengthWithoutComments, ApexClass.NamespacePrefix, ApexClass.Status, ApexLogId,
                 // ApexLog.DurationMilliseconds, ApexLog.Operation, ApexLog.Request, ApexLog.Status, ApexLog.Location, ApexLog.Application
                 FROM ApexTestResult
@@ -88,6 +88,7 @@ public with sharing class TestRunProcessor implements Schedulable {
                     Method_Pass__c = apexTestResult.Outcome == 'Pass' ? true : false,
                     Name = apexTestResult.ApexClass.Name,
                     Stack_Trace__c = apexTestResult.stackTrace,
+                    Run_Time__c = apexTestResult.RunTime,
                     Test_Run__c = testRun.Id
                 )
             );
@@ -98,13 +99,13 @@ public with sharing class TestRunProcessor implements Schedulable {
                 failedTests.add(r);
             }
         }
-        processPassFailDates(failedTests);
-        createFailureSummary(testRun, failedTests);
-
+        processPassFailDates(testRun, failedTests);
+        //createFailureSummary(testRun, failedTests);
+        update testRun;
         insert results;
     }
 
-    private void processPassFailDates(List<Test_Run_Method_Result__c> failedTests) {
+    private void processPassFailDates(Test_Run__c testRun, List<Test_Run_Method_Result__c> failedTests) {
         Map<String, List<Test_Run_Method_Result__c>> previousResultsMap = new Map<String, List<Test_Run_Method_Result__c>>();
         for (Test_Run_Method_Result__c r : failedTests) {
             previousResultsMap.put(r.Method_Name__c, new List<Test_Run_Method_Result__c>());
@@ -123,12 +124,13 @@ public with sharing class TestRunProcessor implements Schedulable {
             }
         }
 
+        Integer newTestFailures = 0;
         for (Test_Run_Method_Result__c failure : failedTests) {
             failure.First_Failure__c = Datetime.now();
-            failure.New_Failure__c = true;
+            Boolean newFailure = true;
             for (Test_Run_Method_Result__c previousResult : previousResultsMap.get(failure.Method_Name__c)) {
                 if (failure.Method_Name__c == previousResult.Method_Name__c && !previousResult.Method_Pass__c) {
-                    failure.New_Failure__c = false;
+                    newFailure = false;
                     failure.First_Failure__c = previousResult.CreatedDate;
                 }
                 if (failure.Method_Name__c == previousResult.Method_Name__c && previousResult.Method_Pass__c) {
@@ -136,30 +138,9 @@ public with sharing class TestRunProcessor implements Schedulable {
                     break;
                 }
             }
+            if (newFailure)
+                newTestFailures++;
         }
-    }
-
-    private void createFailureSummary(Test_Run__c testRun, List<Test_Run_Method_Result__c> failedTests) {
-        List<String> failureMessages = new List<String>();
-        for (Test_Run_Method_Result__c result : failedTests) {
-            if (result.New_Failure__c) {
-                failureMessages.add(
-                    '**  CLASS: ' +
-                    result.Name +
-                    '  **\n' +
-                    'METHOD NAME: ' +
-                    result.Method_Name__c +
-                    '\n' +
-                    'STACK TRACE: ' +
-                    result.Stack_Trace__c +
-                    '\n'
-                );
-            }
-        }
-        if (!failureMessages.isEmpty()) {
-            String failureSummary = String.join(failureMessages, '\n');
-            testRun.Failure_Summary__c = failureSummary;
-            update testRun;
-        }
+        testRun.New_Failures__c = newTestFailures;
     }
 }

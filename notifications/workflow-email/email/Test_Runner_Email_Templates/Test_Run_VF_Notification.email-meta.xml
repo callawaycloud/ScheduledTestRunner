@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<EmailTemplate xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>49.0</apiVersion>
+    <available>true</available>
+    <description>Visual Force Email Template for Test Runner</description>
+    <encodingKey>ISO-8859-1</encodingKey>
+    <name>Test Run VF Notification</name>
+    <style>none</style>
+    <subject>Test Failures</subject>
+    <type>visualforce</type>
+    <uiType>Aloha</uiType>
+</EmailTemplate>
