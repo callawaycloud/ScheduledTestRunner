@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Total_Run_Time__c</fullName>
+    <externalId>false</externalId>
+    <label>Total Run Time</label>
+    <summarizedField>Test_Run_Method_Result__c.Run_Time__c</summarizedField>
+    <summaryForeignKey>Test_Run_Method_Result__c.Test_Run__c</summaryForeignKey>
+    <summaryOperation>sum</summaryOperation>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>
