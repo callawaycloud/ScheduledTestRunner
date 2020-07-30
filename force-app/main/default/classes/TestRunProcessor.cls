@@ -100,7 +100,6 @@ public with sharing class TestRunProcessor implements Schedulable {
             }
         }
         processPassFailDates(testRun, failedTests);
-        //createFailureSummary(testRun, failedTests);
         update testRun;
         insert results;
     }
