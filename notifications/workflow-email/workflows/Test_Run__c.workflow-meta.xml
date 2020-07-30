@@ -6,7 +6,7 @@
         <description>Test Run Failure Notification Alert</description>
         <protected>false</protected>
         <senderType>CurrentUser</senderType>
-        <template>Test_Runner_Email_Templates/Test_Run_Notification</template>
+        <template>Test_Runner_Email_Templates/Test_Run_VF_Notification</template>
     </alerts>
     <rules>
         <fullName>Send Test Run Failure Notification</fullName>
