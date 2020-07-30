@@ -1,8 +1,0 @@
-There was {!Test_Run__c.Test_Failures__c} unit test failure(s) in the recent test run.
-
-{!Test_Run__c.New_Failures__c} new failure(s) were found:
-
-{!Test_Run__c.Failure_Summary__c}
-
-
-To view all errors, view: {!Test_Run__c.Link}
