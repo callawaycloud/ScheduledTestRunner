@@ -11,6 +11,7 @@ A Salesforce package to help monitor organization's unit tests health.
     -    Results are pruned after 30 days
 -   Tracks "First Failure" to help with debugging / noise reduction
 -   Automaticly builds Audit Log query to help troubleshoot what changes might have caused a test to fail
+-   Captures Run Time, which can help identify performance issues or slow tests
 
 ## Install
 
