@@ -8,7 +8,9 @@ A Salesforce package to help monitor organization's unit tests health.
 -   Test results are store in objects
     -   `Test_Run__c`: A test Job instance
     -   `Test_Run_Method_Result__c`: An individual test method result
--   Test results are pruned after 30 days
+    -    Results are pruned after 30 days
+-   Tracks "First Failure" to help with debugging / noise reduction
+-   Automaticly builds Audit Log query to help troubleshoot what changes might have caused a test to fail
 
 ## Install
 
@@ -18,7 +20,7 @@ A Salesforce package to help monitor organization's unit tests health.
 
 ### Scheduling
 
-Schedule the unit test run frequency (example below runs daily at 3am):
+1. Schedule the unit test run frequency (example below runs daily at 3am):
 
 ```java
 TestRunScheduler testRunner = new TestRunScheduler();
@@ -26,7 +28,7 @@ String sch = '0 0 3 * * ?'; // schedule interval time
 System.Schedule('Test Runner', sch, testRunner);
 ```
 
-Schedule the processor to check for finished test runs hourly (or more often if you want):
+2. Schedule the processor to check for finished test runs hourly (or more often if you want):
 
 ```java
 TestRunProcessor testProcessor = new TestRunProcessor();
@@ -39,6 +41,8 @@ System.Schedule('Test Processor', sch, testProcessor);
 -   If you find your test runs are failing inconsistently, you may need to [disabling "parallel" test runs](https://developer.salesforce.com/docs/atlas.en-us.apexcode.meta/apexcode/apex_testing_best_practices.htm)
 
 ### Sending Notifications
+
+![Screen Shot 2020-07-31 at 1 41 14 PM](https://user-images.githubusercontent.com/5217568/89072011-08a54e00-d335-11ea-9ba9-10c5a03cb8ee.png)
 
 To keep things as flexible & upgradable possible, we've decided not to package any notification logic with the "unlocked" package.
 
@@ -54,14 +58,7 @@ However, we have included a simple workflow to send an email when a test fails.
 
 We may add more prebuilt notification methods in the future.
 
-## Uninstall
-
-Please check Salesforce's direction here: https://help.salesforce.com/articleView?id=distribution_uninstalling_packages.htm&type=5
-
-Brief steps:
-
--   setup -> Installed Packages ->
--   click uninstall
+**TIP: If you only want to be notified of new failures, update the workflow to send if `Test_Run__r.New_Test_Failures__c > 0`**
 
 ## Development
 
