@@ -49,7 +49,7 @@ However, we have included a simple workflow to send an email when a test fails.
 **To install workflow email alert:**
 
 -   run `sfdx force:source:convert -r notifications/workflow-email -d ./dist/workflow-email` to create a metadata package
--   run `sfdx force:mdapi:deploy -d .\dist\workflow-email\` to deploy
+-   run `sfdx force:mdapi:deploy -d ./dist/workflow-email/ -w -1` to deploy
 -   Update Workflow Action "Test Run Failure Notification Alert", to include your email addresses
 
 We may add more prebuilt notification methods in the future.
