@@ -1,0 +1,25 @@
+<apex:component controller="TestRunEmailController" access="global">
+    <apex:attribute name="TRId" type="Id" description="Id of Test Run" assignTo="{!testRunId}" />
+    <table border="1" cellspacing="1">
+        <tr style="text-align:center;font-size:13pt;background-color: #72A2C0">
+            <td colspan="2">
+                <b>Failed Unit Tests</b>
+            </td>
+        </tr>
+        <apex:repeat value="{!MethodKeys}" var="key">
+            <tr style="font-size:11pt;background-color: #86fa5198">
+                <td colspan="2">
+                    <b>{!key}</b>
+                </td>
+            </tr>
+            <apex:repeat value="{!MethodResults[key]}" var="result">
+                <tr style="font-size:10pt;background-color: #e6e6e6">
+                    <td>
+                        <a href="{!baseURL}/{!result.Id} ">{!result.Method_Name__c}</a>
+                    </td>
+                    <td>{!result.Message__c}</td>
+                </tr>
+            </apex:repeat>
+        </apex:repeat>
+    </table>
+</apex:component>
