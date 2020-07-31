@@ -12,7 +12,7 @@ A Salesforce package to help monitor organization's unit tests health.
 
 ## Install
 
-[Unlocked Package Install Link](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1C000000lICDQA2)
+[Unlocked Package Install Link](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1C000000pQglQAE)
 
 ## Setup
 
