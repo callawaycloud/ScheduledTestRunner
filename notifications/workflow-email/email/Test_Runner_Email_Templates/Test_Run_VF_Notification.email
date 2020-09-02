@@ -5,5 +5,7 @@
         <br/>
         {!FLOOR(relatedTo.New_Failures__c)} new failure(s) were found:
         <c:NewFailureTable TRId="{!relatedTo.Id}" /><br/><br/>
+        <br/>
+        <c:RemainingFailureTable TRId="{!relatedTo.Id}" /><br/><br/>
     </messaging:htmlEmailBody>
 </messaging:emailTemplate>

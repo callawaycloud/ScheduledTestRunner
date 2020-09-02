@@ -4,17 +4,17 @@
         <tr style="text-align:center;font-size:13pt;background-color: #72A2C0">
             <td colspan="2">
                 <b>
-                    <u>New Failed Unit Tests</u>
+                    <u>Remaining Unit Test Failures</u>
                 </b>
             </td>
         </tr>
-        <apex:repeat value="{!FirstFailureKeys}" var="key">
+        <apex:repeat value="{!RemainingFailureKeys}" var="key">
             <tr style="font-size:11pt;background-color: #86fa5198">
                 <td colspan="2">
                     <b>{!key}</b>
                 </td>
             </tr>
-            <apex:repeat value="{!FirstFailureMap[key]}" var="result">
+            <apex:repeat value="{!RemainingFailureMap[key]}" var="result">
                 <tr style="font-size:10pt;background-color: #e6e6e6">
                     <td>
                         <a href="{!baseURL}/{!result.Id} ">{!result.Method_Name__c}</a>
