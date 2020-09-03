@@ -8,7 +8,7 @@
                 </b>
             </td>
         </tr>
-        <apex:repeat value="{!FirstFailureKeys}" var="key">
+        <apex:repeat value="{!FirstFailureMap}" var="key">
             <tr style="font-size:11pt;background-color: #86fa5198">
                 <td colspan="2">
                     <b>{!key}</b>

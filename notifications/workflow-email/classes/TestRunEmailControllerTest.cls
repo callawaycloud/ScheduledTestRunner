@@ -31,11 +31,9 @@ private class TestRunEmailControllerTest {
 
         TestRunEmailController cont = new TestRunEmailController();
         cont.testRunId = testRun.Id;
-        Map<String, List<Test_Run_Method_Result__c>> contMap = cont.getFirstFailureMap();
-        System.assert(!contMap.isEmpty());
-        List<String> firstKey = cont.getFirstFailureKeys();
-        System.assertEquals(methodResults[0].Name, firstKey[0]);
-        List<String> remainingKey = cont.getRemainingFailureKeys();
-        System.assertEquals(methodResults[1].Name, remainingKey[0]);
+        Map<String, List<Test_Run_Method_Result__c>> firstFailMap = cont.getFirstFailureMap();
+        Map<String, List<Test_Run_Method_Result__c>> remainMap = cont.getRemainingFailureMap();
+        System.assert(firstFailMap.keySet().contains(methodResults[0].Name));
+        System.assert(remainMap.keySet().contains(methodResults[1].Name));
     }
 }
