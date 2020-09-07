@@ -137,6 +137,7 @@ public with sharing class TestRunProcessor implements Schedulable {
                     break;
                 }
             }
+            failure.New_Failure__c=newFailure;
             if (newFailure)
                 newTestFailures++;
         }
