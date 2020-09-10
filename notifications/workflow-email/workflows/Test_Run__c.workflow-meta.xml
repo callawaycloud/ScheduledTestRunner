@@ -2,7 +2,7 @@
 <Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
     <alerts>
         <fullName>Test_Run_Failure_Notification_Alert</fullName>
-        <ccEmails>l5r7f7k3d8u6s1a2@callawaycloud.slack.com</ccEmails>
+        <ccEmails>replace@me.com</ccEmails>
         <description>Test Run Failure Notification Alert</description>
         <protected>false</protected>
         <senderType>CurrentUser</senderType>
