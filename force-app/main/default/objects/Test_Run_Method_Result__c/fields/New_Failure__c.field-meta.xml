@@ -2,9 +2,8 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>New_Failure__c</fullName>
     <defaultValue>false</defaultValue>
-    <description>True if first time test failed</description>
     <externalId>false</externalId>
-    <label>New Failure</label>
+    <label>New Failures</label>
     <trackTrending>false</trackTrending>
     <type>Checkbox</type>
 </CustomField>

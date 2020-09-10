@@ -8,14 +8,14 @@ A Salesforce package to help monitor organization's unit tests health.
 -   Test results are store in objects
     -   `Test_Run__c`: A test Job instance
     -   `Test_Run_Method_Result__c`: An individual test method result
-    -    Results are pruned after 30 days
+    -   Results are pruned after 30 days
 -   Tracks "First Failure" to help with debugging / noise reduction
 -   Automaticly builds Audit Log query to help troubleshoot what changes might have caused a test to fail
 -   Captures Run Time, which can help identify performance issues or slow tests
 
 ## Install
 
-[Unlocked Package Install Link](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1C000000pQglQAE)
+[Unlocked Package Install Link](https://login.salesforce.com/packaging/installPackage.apexp?p0=04t1C000000lIXrQAM)
 
 ## Setup
 
@@ -59,7 +59,7 @@ However, we have included a simple workflow to send an email when a test fails.
 
 We may add more prebuilt notification methods in the future.
 
-**TIP: If you only want to be notified of new failures, update the workflow to send if `Test_Run__r.New_Test_Failures__c > 0`**
+**TIP: If you only want to be notified of new failures, update the workflow to send if `Test_Run__r.New_Failures__c > 0`**
 
 ## Development
 

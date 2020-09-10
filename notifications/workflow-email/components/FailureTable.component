@@ -3,23 +3,30 @@
     <table border="1" cellspacing="1">
         <tr style="text-align:center;font-size:13pt;background-color: #72A2C0">
             <td colspan="2">
-                <b>Failed Unit Tests</b>
+                <b>
+                    <u>
+                        Failed Unit Tests </u>
+                </b>
             </td>
         </tr>
-        <apex:repeat value="{!MethodKeys}" var="key">
+        <apex:repeat value="{!FailureMap}" var="key">
             <tr style="font-size:11pt;background-color: #86fa5198">
                 <td colspan="2">
                     <b>{!key}</b>
                 </td>
             </tr>
-            <apex:repeat value="{!MethodResults[key]}" var="result">
+            <apex:repeat value="{!FailureMap[key]}" var="result">
                 <tr style="font-size:10pt;background-color: #e6e6e6">
                     <td>
+                        {!IF(result.New_Failure__c, '🆕', '')}
                         <a href="{!baseURL}/{!result.Id} ">{!result.Method_Name__c}</a>
                     </td>
                     <td>{!result.Message__c}</td>
+
                 </tr>
             </apex:repeat>
         </apex:repeat>
+
+
     </table>
 </apex:component>

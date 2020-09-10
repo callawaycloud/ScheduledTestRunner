@@ -3,7 +3,8 @@
         There was {!FLOOR(relatedTo.Test_Failures__c)} test failure(s) in the recent test run, with a total run-time of 
         {!FLOOR(relatedTo.Total_Run_Time__c)} milliseconds. <br/>
         <br/>
-        {!FLOOR(relatedTo.New_Failures__c)} new failure(s) were found:
-        <c:NewFailureTable TRId="{!relatedTo.Id}" /><br/><br/>
+        {!FLOOR(relatedTo.New_Failures__c)} new failure(s) were found. <br/>
+        <br/>
+        <c:FailureTable TRId="{!relatedTo.Id}" /><br/><br/>
     </messaging:htmlEmailBody>
 </messaging:emailTemplate>

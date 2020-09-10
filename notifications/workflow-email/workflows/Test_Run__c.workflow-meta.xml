@@ -20,6 +20,11 @@
             <operation>greaterThan</operation>
             <value>0</value>
         </criteriaItems>
+        <criteriaItems>
+            <field>Test_Run__c.Processed__c</field>
+            <operation>equals</operation>
+            <value>True</value>
+        </criteriaItems>
         <triggerType>onCreateOrTriggeringUpdate</triggerType>
     </rules>
 </Workflow>
