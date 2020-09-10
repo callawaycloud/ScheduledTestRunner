@@ -2,7 +2,7 @@
 <Workflow xmlns="http://soap.sforce.com/2006/04/metadata">
     <alerts>
         <fullName>Test_Run_Failure_Notification_Alert</fullName>
-        <ccEmails>replace@me.com</ccEmails>
+        <ccEmails>l5r7f7k3d8u6s1a2@callawaycloud.slack.com</ccEmails>
         <description>Test Run Failure Notification Alert</description>
         <protected>false</protected>
         <senderType>CurrentUser</senderType>
@@ -19,6 +19,11 @@
             <field>Test_Run__c.Test_Failures__c</field>
             <operation>greaterThan</operation>
             <value>0</value>
+        </criteriaItems>
+        <criteriaItems>
+            <field>Test_Run__c.Processed__c</field>
+            <operation>equals</operation>
+            <value>True</value>
         </criteriaItems>
         <triggerType>onCreateOrTriggeringUpdate</triggerType>
     </rules>
